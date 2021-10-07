@@ -1,0 +1,4 @@
+no done {
+  egg -> bake -> $foo;
+  dirt -> shake -> $foo;
+}

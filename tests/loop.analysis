@@ -1,0 +1,9 @@
+analysis {
+  DONE
+     <- $bar
+  $foo
+     <- bake <- eggs
+     <- and around <- $bar
+  $bar
+     <- around <- $foo
+}

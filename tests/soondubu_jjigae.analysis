@@ -1,4 +1,6 @@
 analysis {
+  DONE
+     <- cook 2m <- $eggs
   $chili
      <- dice <- cook 5m <- [1/2] yellow onion
      <- [2 tbsp] chili paste

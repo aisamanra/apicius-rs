@@ -1,0 +1,6 @@
+analysis {
+  DONE
+     <- serve <- $foo
+  $foo
+     <- bake <- eggs
+}

@@ -1,0 +1,2 @@
+graph problems:
+ - path starting at join point '$foo' goes through action path 'enter the void -> ...' but never reaches a join point

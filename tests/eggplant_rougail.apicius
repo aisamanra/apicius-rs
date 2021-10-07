@@ -4,7 +4,7 @@ eggplant rougail {
     -> mash
     -> $combine
     -> mix & [4 tbsp] oil
-    -> DONE;
+    -> <>;
   [2] white onions or shallots -> mince -> $combine;
   [2] hot peppers -> mince -> $combine;
 }

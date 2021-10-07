@@ -1,0 +1,5 @@
+trailing stuff {
+  eggs -> bake -> $foo -> around -> $bar;
+  $bar -> and around -> $foo;
+  $bar -> <>;
+}
