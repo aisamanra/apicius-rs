@@ -1,0 +1,54 @@
+use crate::types::*;
+
+grammar(state: &mut State);
+
+pub Recipe: Recipe = {
+    <name:Text> "{" <rules:(<Rule> ";")*> "}" => Recipe { name, rules },
+};
+
+Separated<T, Sep>: Vec<T> = {
+    <vs:Separated<T, Sep>> <sep:Sep> <v:T> => {
+        let mut vs = vs;
+        vs.push(v);
+        vs
+    },
+    <v: T> => vec![v],
+};
+
+Rule: RuleRef = {
+    <inp: Input> "->" <actions: Separated<Action, "->">> =>
+        state.add_rule(Rule { input: inp, actions }),
+};
+
+Action: Action = {
+    "DONE" => Action::Done,
+    <point:JoinPoint> => Action::Join { point },
+    <action:Text> => Action::Action { action, seasonings: vec![] },
+    <action:Text> "&" <seasonings:IngredientList> => Action::Action { action, seasonings },
+};
+
+Input: Input = {
+    <point:JoinPoint> => Input::Join { point },
+    <list:IngredientList> => Input::Ingredients { list },
+};
+
+IngredientList: Vec<IngredientRef> = Separated<Ingredient, "+">;
+
+Ingredient: IngredientRef = {
+    "[" <amount:Text> "]" <stuff:Text> =>
+        state.add_ingredient(Ingredient {
+            amount: Some(amount),
+            stuff
+        }),
+    <stuff:Text> =>
+        state.add_ingredient(Ingredient {
+            amount: None,
+            stuff
+        }),
+};
+
+Text: StringRef =
+    <s:r"[/A-Za-z0-9_ ]*"> => state.add_string(s.trim());
+
+JoinPoint: StringRef =
+    <s:r"\$[A-Za-z0-9_ ]*"> => state.add_string(s.trim());
