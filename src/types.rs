@@ -1,5 +1,5 @@
 use std::io;
-use std::ops::{Deref,Index};
+use std::ops::{Deref, Index};
 
 use thiserror::Error;
 
@@ -10,7 +10,7 @@ pub struct Loc<T> {
     pub value: T,
 }
 
-impl <T>Deref for Loc<T> {
+impl<T> Deref for Loc<T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {

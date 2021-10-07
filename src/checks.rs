@@ -23,7 +23,10 @@ pub struct Analysis {
 
 impl Analysis {
     fn add(&mut self, key: Option<StringRef>, value: Path) {
-        self.map.entry(key.map(|x| *x)).or_insert_with(Vec::new).push(value);
+        self.map
+            .entry(key.map(|x| *x))
+            .or_insert_with(Vec::new)
+            .push(value);
     }
 
     pub fn debug(&self, w: &mut impl io::Write, state: &State) -> io::Result<()> {
