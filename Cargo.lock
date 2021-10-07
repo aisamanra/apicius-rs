@@ -23,7 +23,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "apicius-rs"
+name = "apicius"
 version = "0.1.0"
 dependencies = [
  "lalrpop",

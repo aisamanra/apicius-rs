@@ -1,5 +1,5 @@
 [package]
-name = "apicius-rs"
+name = "apicius"
 version = "0.1.0"
 authors = ["Getty Ritter <gettylefou@gmail.com>"]
 edition = "2018"
