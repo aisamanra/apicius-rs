@@ -1,7 +1,22 @@
 use std::io;
-use std::ops::Index;
+use std::ops::{Deref,Index};
 
 use thiserror::Error;
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub struct Loc<T> {
+    pub l: usize,
+    pub r: usize,
+    pub value: T,
+}
+
+impl <T>Deref for Loc<T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        &self.value
+    }
+}
 
 #[derive(Error, Debug)]
 pub enum ApiciusError {
@@ -9,7 +24,7 @@ pub enum ApiciusError {
     MissingDone,
 }
 
-pub type StringRef = string_interner::DefaultSymbol;
+pub type StringRef = Loc<string_interner::DefaultSymbol>;
 
 #[derive(Debug)]
 pub struct Recipe {
@@ -86,7 +101,7 @@ impl State {
         RuleRef { idx }
     }
 
-    pub fn add_string(&mut self, s: &str) -> StringRef {
+    pub fn add_string(&mut self, s: &str) -> string_interner::DefaultSymbol {
         self.strings.get_or_intern(s)
     }
 
@@ -149,7 +164,7 @@ impl State {
     }
 
     pub fn debug_recipe(&self, w: &mut impl io::Write, r: &Recipe) -> io::Result<()> {
-        writeln!(w, "{} {{", self.strings.resolve(r.name).unwrap())?;
+        writeln!(w, "{} {{", self.strings.resolve(*r.name).unwrap())?;
         for rule in r.rules.iter() {
             let rule = &self[*rule];
             write!(w, "  ")?;
@@ -184,6 +199,14 @@ impl Index<StringRef> for State {
     type Output = str;
 
     fn index(&self, sf: StringRef) -> &Self::Output {
+        self.strings.resolve(*sf).unwrap()
+    }
+}
+
+impl Index<string_interner::DefaultSymbol> for State {
+    type Output = str;
+
+    fn index(&self, sf: string_interner::DefaultSymbol) -> &Self::Output {
         self.strings.resolve(sf).unwrap()
     }
 }

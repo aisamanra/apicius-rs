@@ -6,6 +6,10 @@ pub Recipe: Recipe = {
     <name:Text> "{" <rules:(<Rule> ";")*> "}" => Recipe { name, rules },
 };
 
+Loc<T>: Loc<T> = {
+  <l:@L> <value:T> <r:@R> => Loc { l, r, value },
+};
+
 Separated<T, Sep>: Vec<T> = {
     <vs:Separated<T, Sep>> <sep:Sep> <v:T> => {
         let mut vs = vs;
@@ -47,8 +51,15 @@ Ingredient: IngredientRef = {
         }),
 };
 
-Text: StringRef =
-    <s:r"[/A-Za-z0-9,_ ]*"> => state.add_string(s.trim());
+Text: StringRef = {
+  <l:@L> <s:r"[/A-Za-z0-9,_ ]*"> <r:@R> => {
+      let value = state.add_string(s.trim());
+      Loc { l, r, value }
+  }
+};
 
 JoinPoint: StringRef =
-    <s:r"\$[A-Za-z0-9_ ]*"> => state.add_string(s.trim());
+    <l:@L> <s:r"\$[A-Za-z0-9_ ]*"> <r:@R> => {
+        let value = state.add_string(s.trim());
+        Loc { l, r, value }
+    };

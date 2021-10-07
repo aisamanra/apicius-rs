@@ -17,13 +17,13 @@ enum Problem {
 
 #[derive(Debug)]
 pub struct Analysis {
-    map: BTreeMap<Option<StringRef>, Vec<Path>>,
+    map: BTreeMap<Option<string_interner::DefaultSymbol>, Vec<Path>>,
     problems: Vec<Problem>,
 }
 
 impl Analysis {
     fn add(&mut self, key: Option<StringRef>, value: Path) {
-        self.map.entry(key).or_insert_with(Vec::new).push(value);
+        self.map.entry(key.map(|x| *x)).or_insert_with(Vec::new).push(value);
     }
 
     pub fn debug(&self, w: &mut impl io::Write, state: &State) -> io::Result<()> {
@@ -58,7 +58,7 @@ impl Analysis {
                     Problem::NoDone => write!(w, "no `<>` state")?,
                     Problem::DanglingSteps(actions, Input::Ingredients { list }) => {
                         write!(w, "path starting from ingredients list '")?;
-                        state.debug_ingredients(w, &list)?;
+                        state.debug_ingredients(w, list)?;
                         write!(w, "' goes through actions '")?;
                         for a in actions.iter() {
                             state.debug_action_step(w, a)?;
