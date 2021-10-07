@@ -10,6 +10,7 @@ edition = "2018"
 regex = "1"
 lalrpop-util = "*"
 string-interner = "*"
+thiserror = "*"
 
 
 [build-dependencies.lalrpop]

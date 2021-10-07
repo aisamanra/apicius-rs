@@ -21,10 +21,10 @@ Rule: RuleRef = {
 };
 
 Action: Action = {
-    "DONE" => Action::Done,
+    "<>" => Action::Done,
     <point:JoinPoint> => Action::Join { point },
-    <action:Text> => Action::Action { action, seasonings: vec![] },
-    <action:Text> "&" <seasonings:IngredientList> => Action::Action { action, seasonings },
+    <action:Text> => Action::Action { step: ActionStep { action, seasonings: vec![] } },
+    <action:Text> "&" <seasonings:IngredientList> => Action::Action { step: ActionStep { action, seasonings } },
 };
 
 Input: Input = {

@@ -1,5 +1,13 @@
 use std::ops::Index;
 
+use thiserror::Error;
+
+#[derive(Error, Debug)]
+pub enum ApiciusError {
+    #[error("Recipe does not include `DONE`")]
+    MissingDone,
+}
+
 pub type StringRef = string_interner::DefaultSymbol;
 
 #[derive(Debug)]
@@ -14,11 +22,16 @@ pub struct Rule {
     pub actions: Vec<Action>,
 }
 
+#[derive(Debug, Clone)]
+pub struct ActionStep {
+    pub action: StringRef,
+    pub seasonings: Vec<IngredientRef>,
+}
+
 #[derive(Debug)]
 pub enum Action {
     Action {
-        action: StringRef,
-        seasonings: Vec<IngredientRef>,
+        step: ActionStep,
     },
     Join {
         point: StringRef,
@@ -26,7 +39,7 @@ pub enum Action {
     Done,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Input {
     Ingredients { list: Vec<IngredientRef> },
     Join { point: StringRef },
@@ -99,16 +112,16 @@ impl State {
         }
     }
 
-    fn debug_input(&self, i: &Input) {
+    pub fn debug_input(&self, i: &Input) {
         match i {
             Input::Join { point } => print!("{}", &self[*point]),
             Input::Ingredients { list } => self.debug_ingredients(list),
         }
     }
 
-    fn debug_action(&self, a: &Action) {
+    pub fn debug_action(&self, a: &Action) {
         match a {
-            Action::Action { action, seasonings } => {
+            Action::Action { step: ActionStep { action, seasonings } } => {
                 print!("{}", &self[*action]);
                 if !seasonings.is_empty() {
                     print!(" & ");
