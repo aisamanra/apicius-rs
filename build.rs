@@ -3,14 +3,37 @@ use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 
+const FILE_PREFIX: &'static str = "
+use crate::types::*;
+use crate::grammar;
+";
+
+const TEST_TEMPLATE: &'static str ="
+// test for %FILE%
+#[test]
+fn test_%PREFIX%() {
+  let source = include_str!(%PATH%);
+  let mut s = State::new();
+  let recipe = grammar::RecipeParser::new().parse(&mut s, source);
+  assert!(recipe.is_ok());
+  %EXPECTATION%
+}
+";
+
+const EXP_TEMPLATE: &'static str = "
+  let exp = std::fs::read_to_string(%PATH%).unwrap();
+  let mut buf = Vec::new();
+  s.debug_recipe(&mut buf, recipe.unwrap()).unwrap();
+  assert_eq!(std::str::from_utf8(&buf).unwrap().trim(), exp.trim());
+";
+
 fn main() {
     lalrpop::process_root().unwrap();
 
     let out_dir = env::var("OUT_DIR").unwrap();
     let destination = Path::new(&out_dir).join("exp_tests.rs");
     let mut test_file = File::create(&destination).unwrap();
-    writeln!(test_file, "use crate::types::*;").unwrap();
-    writeln!(test_file, "use crate::grammar;").unwrap();
+    writeln!(test_file, "{}", FILE_PREFIX).unwrap();
     for exp in std::fs::read_dir("tests").unwrap() {
         let exp = exp.unwrap().path().canonicalize().unwrap();
         let fname = exp.file_name().unwrap().to_string_lossy();
@@ -19,42 +42,21 @@ fn main() {
             expected.pop();
             expected.push(format!("{}.exp", prefix));
 
-            writeln!(test_file, "// writing test for {}", fname).unwrap();
-            writeln!(test_file, "#[test]").unwrap();
-            writeln!(test_file, "fn test_{}() {{", prefix).unwrap();
-            writeln!(
-                test_file,
-                "  let source = include_str!({:?});",
-                exp.as_path()
-            )
-            .unwrap();
-            writeln!(test_file, "  let mut s = State::new();").unwrap();
-            writeln!(
-                test_file,
-                "  let recipe = grammar::RecipeParser::new().parse(&mut s, source);"
-            )
-            .unwrap();
-            writeln!(test_file, "  assert!(recipe.is_ok());").unwrap();
+            let mut test = TEST_TEMPLATE
+                .replace("%FILE%", &fname)
+                .replace("%PREFIX%", prefix)
+                .replace("%PATH%", &format!("{:?}", exp.as_path()));
             if expected.exists() {
-                writeln!(
-                    test_file,
-                    "  let exp = std::fs::read_to_string({:?}).unwrap();",
-                    expected.as_path()
-                )
-                .unwrap();
-                writeln!(test_file, "  let mut buf = Vec::new();").unwrap();
-                writeln!(
-                    test_file,
-                    "  s.debug_recipe(&mut buf, recipe.unwrap()).unwrap();"
-                )
-                .unwrap();
-                writeln!(
-                    test_file,
-                    "  assert_eq!(std::str::from_utf8(&buf).unwrap().trim(), exp.trim());"
-                )
-                .unwrap();
+                test = test.
+                    replace(
+                    "%EXPECTATION%",
+                    &EXP_TEMPLATE
+                        .replace("%PATH%", &format!("{:?}", expected.as_path()))
+                    );
+            } else {
+                test = test.replace("%EXPECTATION%", "");
             }
-            writeln!(test_file, "}}").unwrap();
+            writeln!(test_file, "{}", test).unwrap()
         }
     }
 }
