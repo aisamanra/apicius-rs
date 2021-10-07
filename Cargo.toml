@@ -11,12 +11,12 @@ name = "apicius"
 
 [[bin]]
 name = "apicius"
-path = "src/main.rs"
+path = "bin/main.rs"
 
 [[bin]]
 name = "apicius-regenerate"
 test = true
-path = "src/regenerate.rs"
+path = "tools/regenerate.rs"
 
 [dependencies]
 regex = "1"
