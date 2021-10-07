@@ -97,11 +97,7 @@ impl State {
         write!(w, "{}", &self[i.stuff])
     }
 
-    fn debug_ingredients(
-        &self,
-        w: &mut impl io::Write,
-        list: &Vec<IngredientRef>,
-    ) -> io::Result<()> {
+    fn debug_ingredients(&self, w: &mut impl io::Write, list: &[IngredientRef]) -> io::Result<()> {
         if list.is_empty() {
             return Ok(());
         }
@@ -147,7 +143,7 @@ impl State {
             self.debug_input(w, &rule.input)?;
             for action in rule.actions.iter() {
                 write!(w, " -> ")?;
-                self.debug_action(w, &action)?;
+                self.debug_action(w, action)?;
             }
             writeln!(w, ";")?;
         }
@@ -176,5 +172,11 @@ impl Index<StringRef> for State {
 
     fn index(&self, sf: StringRef) -> &Self::Output {
         self.strings.resolve(sf).unwrap()
+    }
+}
+
+impl Default for State {
+    fn default() -> State {
+        Self::new()
     }
 }

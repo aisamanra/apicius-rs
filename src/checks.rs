@@ -15,10 +15,7 @@ struct Analysis {
 
 impl Analysis {
     fn add(&mut self, key: Option<StringRef>, value: Path) {
-        self.map
-            .entry(key)
-            .or_insert_with(|| Vec::new())
-            .push(value);
+        self.map.entry(key).or_insert_with(Vec::new).push(value);
     }
 }
 

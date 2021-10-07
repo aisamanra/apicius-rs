@@ -1,6 +1,6 @@
 use apicius::{checks, grammar, types};
 
-const SAMPLE: &'static str = "
+const SAMPLE: &str = "
 nicer scrambled eggs {
   [1/2] onion + [1 clove] garlic
     -> chop coarsely -> sautee & butter -> $mix;

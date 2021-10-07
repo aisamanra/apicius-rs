@@ -3,12 +3,12 @@ use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 
-const FILE_PREFIX: &'static str = "
+const FILE_PREFIX: &str = "
 use crate::types::*;
 use crate::grammar;
 ";
 
-const TEST_TEMPLATE: &'static str = "
+const TEST_TEMPLATE: &str = "
 // test for %FILE%
 #[test]
 fn test_%PREFIX%() {
@@ -20,7 +20,7 @@ fn test_%PREFIX%() {
 }
 ";
 
-const EXP_TEMPLATE: &'static str = "
+const EXP_TEMPLATE: &str = "
   let exp = std::fs::read_to_string(%PATH%).unwrap();
   let mut buf = Vec::new();
   s.debug_recipe(&mut buf, recipe.unwrap()).unwrap();
