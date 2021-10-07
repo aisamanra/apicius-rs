@@ -1,0 +1,7 @@
+analysis {
+  DONE
+     <- stir <- $mix
+  $mix
+     <- chop coarsely <- sautee <- [1/2] onion + [1 clove] garlic
+     <- whisk <- [2] eggs
+}
