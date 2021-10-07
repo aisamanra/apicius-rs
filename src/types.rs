@@ -16,8 +16,13 @@ pub struct Rule {
 
 #[derive(Debug)]
 pub enum Action {
-    Action { action: StringRef, seasonings: Vec<IngredientRef> },
-    Join { point: StringRef },
+    Action {
+        action: StringRef,
+        seasonings: Vec<IngredientRef>,
+    },
+    Join {
+        point: StringRef,
+    },
     Done,
 }
 
@@ -32,7 +37,6 @@ pub struct Ingredient {
     pub amount: Option<StringRef>,
     pub stuff: StringRef,
 }
-
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub struct IngredientRef {
@@ -97,10 +101,8 @@ impl State {
 
     fn debug_input(&self, i: &Input) {
         match i {
-            Input::Join { point } =>
-                print!("{}", &self[*point]),
-            Input::Ingredients { list } =>
-                self.debug_ingredients(list),
+            Input::Join { point } => print!("{}", &self[*point]),
+            Input::Ingredients { list } => self.debug_ingredients(list),
         }
     }
 
@@ -113,8 +115,7 @@ impl State {
                     self.debug_ingredients(seasonings);
                 }
             }
-            Action::Join { point } =>
-                print!("{}", &self[*point]),
+            Action::Join { point } => print!("{}", &self[*point]),
             Action::Done => print!("DONE"),
         }
     }
@@ -134,7 +135,6 @@ impl State {
         println!("}}");
     }
 }
-
 
 impl Index<RuleRef> for State {
     type Output = Rule;
