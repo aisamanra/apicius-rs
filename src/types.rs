@@ -90,14 +90,18 @@ impl State {
         self.strings.get_or_intern(s)
     }
 
-    fn debug_ingredient(&self, w: &mut impl io::Write, i: &Ingredient) -> io::Result<()> {
+    pub fn debug_ingredient(&self, w: &mut impl io::Write, i: &Ingredient) -> io::Result<()> {
         if let Some(amt) = i.amount {
             write!(w, "[{}] ", &self[amt])?;
         }
         write!(w, "{}", &self[i.stuff])
     }
 
-    fn debug_ingredients(&self, w: &mut impl io::Write, list: &[IngredientRef]) -> io::Result<()> {
+    pub fn debug_ingredients(
+        &self,
+        w: &mut impl io::Write,
+        list: &[IngredientRef],
+    ) -> io::Result<()> {
         if list.is_empty() {
             return Ok(());
         }
@@ -114,6 +118,15 @@ impl State {
         match i {
             Input::Join { point } => write!(w, "{}", &self[*point])?,
             Input::Ingredients { list } => self.debug_ingredients(w, list)?,
+        }
+        Ok(())
+    }
+
+    pub fn debug_action_step(&self, w: &mut impl io::Write, a: &ActionStep) -> io::Result<()> {
+        write!(w, "{}", &self[a.action])?;
+        if !a.seasonings.is_empty() {
+            write!(w, " & ")?;
+            self.debug_ingredients(w, &a.seasonings)?;
         }
         Ok(())
     }

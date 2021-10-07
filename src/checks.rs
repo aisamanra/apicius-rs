@@ -10,8 +10,15 @@ struct Path {
 }
 
 #[derive(Debug)]
+enum Problem {
+    NoDone,
+    DanglingSteps(Vec<ActionStep>, Input),
+}
+
+#[derive(Debug)]
 pub struct Analysis {
     map: BTreeMap<Option<StringRef>, Vec<Path>>,
+    problems: Vec<Problem>,
 }
 
 impl Analysis {
@@ -40,9 +47,45 @@ impl Analysis {
         writeln!(w, "}}")
     }
 
+    pub fn debug_problems(&self, w: &mut impl io::Write, state: &State) -> io::Result<()> {
+        if self.problems.is_empty() {
+            writeln!(w, "graph ok")?;
+        } else {
+            writeln!(w, "graph problems:")?;
+            for p in self.problems.iter() {
+                write!(w, " - ")?;
+                match p {
+                    Problem::NoDone => write!(w, "no `<>` state")?,
+                    Problem::DanglingSteps(actions, Input::Ingredients { list }) => {
+                        write!(w, "path starting from ingredients list '")?;
+                        state.debug_ingredients(w, &list)?;
+                        write!(w, "' goes through actions '")?;
+                        for a in actions.iter() {
+                            state.debug_action_step(w, a)?;
+                        }
+                        write!(w, "' but never reaches a join point")?;
+                    }
+                    Problem::DanglingSteps(actions, Input::Join { point }) => {
+                        write!(w, "path starting at join point '{}'", &state[*point])?;
+                        write!(w, " goes through action path '")?;
+                        for a in actions.iter() {
+                            state.debug_action_step(w, a)?;
+                            write!(w, " -> ")?;
+                        }
+                        write!(w, "...' but never reaches a join point")?;
+                    }
+                }
+                writeln!(w)?;
+            }
+        }
+
+        Ok(())
+    }
+
     pub fn from_recipe(state: &State, recipe: &Recipe) -> Self {
         let mut analysis = Analysis {
             map: BTreeMap::new(),
+            problems: Vec::new(),
         };
 
         'outer: for rule in recipe.rules.iter() {
@@ -67,6 +110,17 @@ impl Analysis {
                     }
                 }
             }
+
+            if !path.actions.is_empty() {
+                // we've got leftover actions we haven't put somewhere, which is not great!
+                analysis
+                    .problems
+                    .push(Problem::DanglingSteps(path.actions, path.start));
+            }
+        }
+
+        if !analysis.map.contains_key(&None) {
+            analysis.problems.push(Problem::NoDone);
         }
 
         analysis
@@ -77,5 +131,7 @@ pub fn to_tree(state: &State, recipe: &Recipe) -> Result<(), String> {
     let analysis = Analysis::from_recipe(state, recipe);
 
     analysis.debug(&mut io::stdout(), state).unwrap();
+    analysis.debug_problems(&mut io::stdout(), state).unwrap();
+
     Ok(())
 }
