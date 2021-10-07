@@ -8,7 +8,7 @@ use crate::types::*;
 use crate::grammar;
 ";
 
-const TEST_TEMPLATE: &'static str ="
+const TEST_TEMPLATE: &'static str = "
 // test for %FILE%
 #[test]
 fn test_%PREFIX%() {
@@ -47,12 +47,10 @@ fn main() {
                 .replace("%PREFIX%", prefix)
                 .replace("%PATH%", &format!("{:?}", exp.as_path()));
             if expected.exists() {
-                test = test.
-                    replace(
+                test = test.replace(
                     "%EXPECTATION%",
-                    &EXP_TEMPLATE
-                        .replace("%PATH%", &format!("{:?}", expected.as_path()))
-                    );
+                    &EXP_TEMPLATE.replace("%PATH%", &format!("{:?}", expected.as_path())),
+                );
             } else {
                 test = test.replace("%EXPECTATION%", "");
             }
