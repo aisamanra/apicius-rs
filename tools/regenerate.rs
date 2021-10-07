@@ -21,6 +21,9 @@ fn main() {
                 let mut f = std::fs::File::create(exp_filename("analysis")).unwrap();
                 let a = checks::Analysis::from_recipe(&state, &recipe);
                 a.debug(&mut f, &state).unwrap();
+
+                let mut f = std::fs::File::create(exp_filename("problems")).unwrap();
+                a.debug_problems(&mut f, &state).unwrap();
             }
         }
     }

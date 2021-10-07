@@ -34,6 +34,12 @@ fn test_%PREFIX%() {
     include_str!(\"%ROOT%/tests/%PREFIX%.analysis\").trim(),
   );
 
+  let mut buf = Vec::new();
+  analysis.debug_problems(&mut buf, &s).unwrap();
+  assert_eq!(
+    std::str::from_utf8(&buf).unwrap().trim(),
+    include_str!(\"%ROOT%/tests/%PREFIX%.problems\").trim(),
+  );
 }
 ";
 
