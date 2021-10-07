@@ -1,1 +1,2 @@
-graph ok
+graph problems:
+ - the join point '$bar' is involved in a cycle

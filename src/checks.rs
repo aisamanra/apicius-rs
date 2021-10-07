@@ -154,9 +154,9 @@ impl Analysis {
 
         if !analysis.map.contains_key(&None) {
             analysis.problems.push(Problem::NoDone);
+        } else {
+            analysis.find_cycles();
         }
-
-        analysis.find_cycles();
 
         analysis
     }
