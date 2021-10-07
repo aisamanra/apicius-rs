@@ -34,7 +34,7 @@ impl Analysis {
                 }
                 write!(w, " <- ")?;
                 state.debug_input(w, &alt.start).unwrap();
-                writeln!(w, "")?;
+                writeln!(w)?;
             }
         }
         writeln!(w, "}}")
