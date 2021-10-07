@@ -1,15 +1,4 @@
-#[macro_use]
-extern crate lalrpop_util;
-
-pub mod checks;
-pub mod types;
-
-#[cfg(test)]
-pub mod test {
-    include!(concat!(env!("OUT_DIR"), "/exp_tests.rs"));
-}
-
-lalrpop_mod!(pub grammar);
+use apicius::{checks,types,grammar};
 
 const SAMPLE: &'static str = "
 nicer scrambled eggs {
@@ -27,5 +16,5 @@ fn main() {
     assert!(recipe.is_ok());
     let recipe = recipe.unwrap();
     assert!(checks::to_tree(&s, &recipe).is_ok());
-    s.debug_recipe(&mut std::io::stdout(), recipe);
+    s.debug_recipe(&mut std::io::stdout(), recipe).unwrap();
 }

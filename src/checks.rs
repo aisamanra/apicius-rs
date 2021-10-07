@@ -61,7 +61,7 @@ pub fn to_tree(state: &State, recipe: &Recipe) -> Result<(), String> {
                 print!(" <- {}", &state[a.action]);
             }
             print!(" <- ");
-            state.debug_input(&mut std::io::stdout(), &alt.start);
+            state.debug_input(&mut std::io::stdout(), &alt.start).unwrap();
             println!(";");
         }
     }
