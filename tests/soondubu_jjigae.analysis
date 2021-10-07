@@ -1,13 +1,10 @@
 analysis {
-  $zucchini
-     <- cook 1m <- $chili
-     <- dice <- [1] zucchini
-  $eggs
-     <- cover with broth, simmer <- $tofu
-     <- [3] eggs
   $chili
      <- dice <- cook 5m <- [1/2] yellow onion
      <- [2 tbsp] chili paste
+  $zucchini
+     <- cook 1m <- $chili
+     <- dice <- [1] zucchini
   $kimchi
      <- stir <- $zucchini
      <- chop coarsely <- [1 cup] kimchi
@@ -17,4 +14,7 @@ analysis {
   $tofu
      <- boil <- $broth
      <- [16oz] silken tofu
+  $eggs
+     <- cover with broth, simmer <- $tofu
+     <- [3] eggs
 }

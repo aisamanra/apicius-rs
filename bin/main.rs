@@ -16,5 +16,5 @@ fn main() {
     assert!(recipe.is_ok());
     let recipe = recipe.unwrap();
     assert!(checks::to_tree(&s, &recipe).is_ok());
-    s.debug_recipe(&mut std::io::stdout(), recipe).unwrap();
+    s.debug_recipe(&mut std::io::stdout(), &recipe).unwrap();
 }

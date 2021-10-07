@@ -135,10 +135,10 @@ impl State {
         Ok(())
     }
 
-    pub fn debug_recipe(&self, w: &mut impl io::Write, r: Recipe) -> io::Result<()> {
+    pub fn debug_recipe(&self, w: &mut impl io::Write, r: &Recipe) -> io::Result<()> {
         writeln!(w, "{} {{", self.strings.resolve(r.name).unwrap())?;
-        for rule in r.rules {
-            let rule = &self[rule];
+        for rule in r.rules.iter() {
+            let rule = &self[*rule];
             write!(w, "  ")?;
             self.debug_input(w, &rule.input)?;
             for action in rule.actions.iter() {
