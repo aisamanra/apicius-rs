@@ -2,6 +2,23 @@ use crate::types::*;
 
 grammar(state: &mut State);
 
+match {
+    "{",
+    "}",
+    "<>",
+    "&",
+    "[",
+    "]",
+    "->",
+    "+",
+    r"[/A-Za-z0-9,_][/A-Za-z0-9,_ ]*",
+    r"\$[A-Za-z0-9_ ]*",
+    ";",
+
+    r"\s*" => {},
+    r"#[^\n\r]*[\n\r]*" => {},
+}
+
 pub Recipe: Recipe = {
     <name:Text> "{" <rules:(<Rule> ";")*> "}" => Recipe { name, rules },
 };
@@ -52,7 +69,7 @@ Ingredient: IngredientRef = {
 };
 
 Text: StringRef = {
-  <l:@L> <s:r"[/A-Za-z0-9,_ ]*"> <r:@R> => {
+  <l:@L> <s:r"[/A-Za-z0-9,_][/A-Za-z0-9,_ ]*"> <r:@R> => {
       let value = state.add_string(s.trim());
       Loc { l, r, value }
   }
