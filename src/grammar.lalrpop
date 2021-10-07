@@ -48,7 +48,7 @@ Ingredient: IngredientRef = {
 };
 
 Text: StringRef =
-    <s:r"[/A-Za-z0-9_ ]*"> => state.add_string(s.trim());
+    <s:r"[/A-Za-z0-9,_ ]*"> => state.add_string(s.trim());
 
 JoinPoint: StringRef =
     <s:r"\$[A-Za-z0-9_ ]*"> => state.add_string(s.trim());
