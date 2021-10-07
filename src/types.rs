@@ -1,4 +1,5 @@
 use std::ops::Index;
+use std::io;
 
 use thiserror::Error;
 
@@ -93,59 +94,62 @@ impl State {
         self.strings.get_or_intern(s)
     }
 
-    fn debug_ingredient(&self, i: &Ingredient) {
+    fn debug_ingredient(&self, w: &mut impl io::Write, i: &Ingredient) -> io::Result<()> {
         if let Some(amt) = i.amount {
-            print!("[{}] ", &self[amt]);
+            write!(w, "[{}] ", &self[amt])?;
         }
-        print!("{}", &self[i.stuff]);
+        write!(w, "{}", &self[i.stuff])
     }
 
-    fn debug_ingredients(&self, list: &Vec<IngredientRef>) {
+    fn debug_ingredients(&self, w: &mut impl io::Write, list: &Vec<IngredientRef>) -> io::Result<()> {
         if list.is_empty() {
-            return;
+            return Ok(());
         }
 
-        self.debug_ingredient(&self[list[0]]);
+        self.debug_ingredient(w, &self[list[0]])?;
         for i in list.iter().skip(1) {
-            print!(" + ");
-            self.debug_ingredient(&self[*i]);
+            write!(w, " + ")?;
+            self.debug_ingredient(w, &self[*i])?;
         }
+        Ok(())
     }
 
-    pub fn debug_input(&self, i: &Input) {
+    pub fn debug_input(&self, w: &mut impl io::Write, i: &Input) -> io::Result<()> {
         match i {
-            Input::Join { point } => print!("{}", &self[*point]),
-            Input::Ingredients { list } => self.debug_ingredients(list),
+            Input::Join { point } => write!(w, "{}", &self[*point])?,
+            Input::Ingredients { list } => self.debug_ingredients(w, list)?,
         }
+        Ok(())
     }
 
-    pub fn debug_action(&self, a: &Action) {
+    pub fn debug_action(&self, w: &mut impl io::Write, a: &Action) -> io::Result<()> {
         match a {
             Action::Action { step: ActionStep { action, seasonings } } => {
-                print!("{}", &self[*action]);
+                write!(w, "{}", &self[*action])?;
                 if !seasonings.is_empty() {
-                    print!(" & ");
-                    self.debug_ingredients(seasonings);
+                    write!(w, " & ")?;
+                    self.debug_ingredients(w, seasonings)?;
                 }
             }
-            Action::Join { point } => print!("{}", &self[*point]),
-            Action::Done => print!("DONE"),
+            Action::Join { point } => write!(w, "{}", &self[*point])?,
+            Action::Done => write!(w, "<>")?,
         }
+        Ok(())
     }
 
-    pub fn debug_recipe(&self, r: Recipe) {
-        println!("{} {{", self.strings.resolve(r.name).unwrap());
+    pub fn debug_recipe(&self, w: &mut impl io::Write, r: Recipe) -> io::Result<()> {
+        writeln!(w, "{} {{", self.strings.resolve(r.name).unwrap())?;
         for rule in r.rules {
             let rule = &self[rule];
-            print!("  ");
-            self.debug_input(&rule.input);
+            write!(w, "  ")?;
+            self.debug_input(w, &rule.input)?;
             for action in rule.actions.iter() {
-                print!(" -> ");
-                self.debug_action(&action);
+                write!(w, " -> ")?;
+                self.debug_action(w, &action)?;
             }
-            println!(";");
+            writeln!(w, ";")?;
         }
-        println!("}}");
+        writeln!(w, "}}")
     }
 }
 
