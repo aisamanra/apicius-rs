@@ -1,7 +1,7 @@
 use std::env;
 use std::fs::File;
-use std::path::Path;
 use std::io::Write;
+use std::path::Path;
 
 fn main() {
     lalrpop::process_root().unwrap();
@@ -22,15 +22,37 @@ fn main() {
             writeln!(test_file, "// writing test for {}", fname).unwrap();
             writeln!(test_file, "#[test]").unwrap();
             writeln!(test_file, "fn test_{}() {{", prefix).unwrap();
-            writeln!(test_file, "  let source = include_str!({:?});", exp.as_path()).unwrap();
+            writeln!(
+                test_file,
+                "  let source = include_str!({:?});",
+                exp.as_path()
+            )
+            .unwrap();
             writeln!(test_file, "  let mut s = State::new();").unwrap();
-            writeln!(test_file, "  let recipe = grammar::RecipeParser::new().parse(&mut s, source);").unwrap();
+            writeln!(
+                test_file,
+                "  let recipe = grammar::RecipeParser::new().parse(&mut s, source);"
+            )
+            .unwrap();
             writeln!(test_file, "  assert!(recipe.is_ok());").unwrap();
             if expected.exists() {
-                writeln!(test_file, "  let exp = std::fs::read_to_string({:?}).unwrap();", expected.as_path()).unwrap();
+                writeln!(
+                    test_file,
+                    "  let exp = std::fs::read_to_string({:?}).unwrap();",
+                    expected.as_path()
+                )
+                .unwrap();
                 writeln!(test_file, "  let mut buf = Vec::new();").unwrap();
-                writeln!(test_file, "  s.debug_recipe(&mut buf, recipe.unwrap()).unwrap();").unwrap();
-                writeln!(test_file, "  assert_eq!(std::str::from_utf8(&buf).unwrap().trim(), exp.trim());").unwrap();
+                writeln!(
+                    test_file,
+                    "  s.debug_recipe(&mut buf, recipe.unwrap()).unwrap();"
+                )
+                .unwrap();
+                writeln!(
+                    test_file,
+                    "  assert_eq!(std::str::from_utf8(&buf).unwrap().trim(), exp.trim());"
+                )
+                .unwrap();
             }
             writeln!(test_file, "}}").unwrap();
         }

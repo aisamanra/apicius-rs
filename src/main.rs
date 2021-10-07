@@ -1,4 +1,4 @@
-use apicius::{checks,types,grammar};
+use apicius::{checks, grammar, types};
 
 const SAMPLE: &'static str = "
 nicer scrambled eggs {

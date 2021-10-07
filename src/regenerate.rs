@@ -1,4 +1,4 @@
-use apicius::{grammar,types::State};
+use apicius::{grammar, types::State};
 
 fn main() {
     for exp in std::fs::read_dir("tests").unwrap() {

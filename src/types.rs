@@ -1,5 +1,5 @@
-use std::ops::Index;
 use std::io;
+use std::ops::Index;
 
 use thiserror::Error;
 
@@ -31,12 +31,8 @@ pub struct ActionStep {
 
 #[derive(Debug)]
 pub enum Action {
-    Action {
-        step: ActionStep,
-    },
-    Join {
-        point: StringRef,
-    },
+    Action { step: ActionStep },
+    Join { point: StringRef },
     Done,
 }
 
@@ -101,7 +97,11 @@ impl State {
         write!(w, "{}", &self[i.stuff])
     }
 
-    fn debug_ingredients(&self, w: &mut impl io::Write, list: &Vec<IngredientRef>) -> io::Result<()> {
+    fn debug_ingredients(
+        &self,
+        w: &mut impl io::Write,
+        list: &Vec<IngredientRef>,
+    ) -> io::Result<()> {
         if list.is_empty() {
             return Ok(());
         }
@@ -124,7 +124,9 @@ impl State {
 
     pub fn debug_action(&self, w: &mut impl io::Write, a: &Action) -> io::Result<()> {
         match a {
-            Action::Action { step: ActionStep { action, seasonings } } => {
+            Action::Action {
+                step: ActionStep { action, seasonings },
+            } => {
                 write!(w, "{}", &self[*action])?;
                 if !seasonings.is_empty() {
                     write!(w, " & ")?;

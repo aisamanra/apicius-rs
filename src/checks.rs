@@ -15,14 +15,17 @@ struct Analysis {
 
 impl Analysis {
     fn add(&mut self, key: Option<StringRef>, value: Path) {
-        self.map.entry(key)
+        self.map
+            .entry(key)
             .or_insert_with(|| Vec::new())
             .push(value);
     }
 }
 
 pub fn to_tree(state: &State, recipe: &Recipe) -> Result<(), String> {
-    let mut analysis = Analysis { map: HashMap::new() };
+    let mut analysis = Analysis {
+        map: HashMap::new(),
+    };
     'outer: for rule in recipe.rules.iter() {
         let rule = &state[*rule];
         let mut path = Path {
@@ -31,8 +34,7 @@ pub fn to_tree(state: &State, recipe: &Recipe) -> Result<(), String> {
         };
         for action in rule.actions.iter() {
             match action {
-                Action::Action { step } =>
-                    path.actions.push(step.clone()),
+                Action::Action { step } => path.actions.push(step.clone()),
                 Action::Join { point } => {
                     analysis.add(Some(*point), path);
                     path = Path {
@@ -61,7 +63,9 @@ pub fn to_tree(state: &State, recipe: &Recipe) -> Result<(), String> {
                 print!(" <- {}", &state[a.action]);
             }
             print!(" <- ");
-            state.debug_input(&mut std::io::stdout(), &alt.start).unwrap();
+            state
+                .debug_input(&mut std::io::stdout(), &alt.start)
+                .unwrap();
             println!(";");
         }
     }
