@@ -25,6 +25,9 @@ lalrpop-util = "*"
 string-interner = "*"
 thiserror = "*"
 
+[dev-dependencies]
+pretty_assertions = "*"
+
 
 [build-dependencies.lalrpop]
 version = "*"

@@ -4,9 +4,29 @@ use std::io::Write;
 use std::path::Path;
 
 const FILE_PREFIX: &str = "
+#[cfg(test)]
+use pretty_assertions::{assert_eq};
+
 use crate::types::*;
 use crate::grammar;
 use crate::checks;
+
+// to let us use pretty_assertions with strings, we write a newtype
+// that delegates Debug to Display
+#[derive(PartialEq, Eq)]
+struct StringWrapper<'a> {
+  wrapped: &'a str,
+}
+
+impl<'a> core::fmt::Debug for StringWrapper<'a> {
+  fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+    core::fmt::Display::fmt(self.wrapped, f)
+  }
+}
+
+fn assert_eq(x: &str, y: &str) {
+  assert_eq!(StringWrapper {wrapped: x}, StringWrapper {wrapped: y});
+}
 ";
 
 const TEST_TEMPLATE: &str = "
@@ -21,7 +41,7 @@ fn test_%PREFIX%() {
 
   let mut buf = Vec::new();
   s.debug_recipe(&mut buf, &recipe).unwrap();
-  assert_eq!(
+  assert_eq(
     std::str::from_utf8(&buf).unwrap().trim(),
     include_str!(\"%ROOT%/tests/%PREFIX%.exp\").trim(),
   );
@@ -29,14 +49,14 @@ fn test_%PREFIX%() {
   let mut buf = Vec::new();
   let analysis = checks::Analysis::from_recipe(&s, &recipe);
   analysis.debug(&mut buf, &s).unwrap();
-  assert_eq!(
+  assert_eq(
     std::str::from_utf8(&buf).unwrap().trim(),
     include_str!(\"%ROOT%/tests/%PREFIX%.analysis\").trim(),
   );
 
   let mut buf = Vec::new();
   analysis.debug_problems(&mut buf, &s).unwrap();
-  assert_eq!(
+  assert_eq(
     std::str::from_utf8(&buf).unwrap().trim(),
     include_str!(\"%ROOT%/tests/%PREFIX%.problems\").trim(),
   );
