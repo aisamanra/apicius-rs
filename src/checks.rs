@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::io;
 
 use crate::types::*;
@@ -13,6 +13,7 @@ struct Path {
 enum Problem {
     NoDone,
     DanglingSteps(Vec<ActionStep>, Input),
+    HasCycle(string_interner::DefaultSymbol),
 }
 
 #[derive(Debug)]
@@ -77,12 +78,41 @@ impl Analysis {
                         }
                         write!(w, "...' but never reaches a join point")?;
                     }
+                    Problem::HasCycle(sym) => write!(
+                        w,
+                        "the join point '{}' is involved in a cycle",
+                        &state[*sym]
+                    )?,
                 }
                 writeln!(w)?;
             }
         }
 
         Ok(())
+    }
+
+    pub fn find_cycles(&mut self) {
+        let mut frontier: Vec<string_interner::DefaultSymbol> = Vec::new();
+        let mut seen = BTreeSet::new();
+
+        for path in self.map[&None].iter() {
+            if let Input::Join { point } = path.start {
+                frontier.push(point.value)
+            }
+        }
+
+        while let Some(elem) = frontier.pop() {
+            if seen.contains(&elem) {
+                self.problems.push(Problem::HasCycle(elem));
+                break;
+            }
+            seen.insert(elem);
+            for path in self.map[&Some(elem)].iter() {
+                if let Input::Join { point } = path.start {
+                    frontier.push(point.value);
+                }
+            }
+        }
     }
 
     pub fn from_recipe(state: &State, recipe: &Recipe) -> Self {
@@ -125,6 +155,8 @@ impl Analysis {
         if !analysis.map.contains_key(&None) {
             analysis.problems.push(Problem::NoDone);
         }
+
+        analysis.find_cycles();
 
         analysis
     }
