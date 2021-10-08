@@ -24,6 +24,9 @@ regex = "1"
 lalrpop-util = "*"
 string-interner = "*"
 thiserror = "*"
+cairo-rs = { version = "*", features = ["png"] }
+pango = "*"
+pangocairo = "*"
 
 [dev-dependencies]
 pretty_assertions = "*"

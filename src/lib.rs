@@ -2,6 +2,7 @@
 extern crate lalrpop_util;
 
 pub mod checks;
+pub mod render;
 pub mod types;
 
 #[cfg(test)]
