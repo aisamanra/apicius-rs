@@ -1,6 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::io;
 
+pub use crate::types::State;
 use crate::types::*;
 
 #[derive(Debug)]
@@ -20,6 +21,36 @@ enum Problem {
 pub struct Analysis {
     map: BTreeMap<Option<string_interner::DefaultSymbol>, Vec<Path>>,
     problems: Vec<Problem>,
+}
+
+#[derive(Debug)]
+pub struct BackwardTree {
+    pub actions: Vec<ActionStep>,
+    pub paths: Vec<BackwardTree>,
+    pub ingredients: Vec<IngredientRef>,
+    pub size: usize,
+}
+
+impl BackwardTree {
+    pub fn debug(&self, w: &mut impl io::Write, s: &State) -> io::Result<()> {
+        self.debug_helper(w, s, 0)
+    }
+
+    pub fn debug_helper(&self, w: &mut impl io::Write, s: &State, depth: usize) -> io::Result<()> {
+        for _ in 0..depth {
+            write!(w, "  ")?;
+        }
+        for a in self.actions.iter() {
+            s.debug_action_step(w, a)?;
+            write!(w, " -> ")?;
+        }
+        s.debug_ingredients(w, &self.ingredients)?;
+        writeln!(w)?;
+        for child in self.paths.iter() {
+            child.debug_helper(w, s, depth + 1)?;
+        }
+        Ok(())
+    }
 }
 
 impl Analysis {
@@ -160,13 +191,44 @@ impl Analysis {
 
         analysis
     }
-}
 
-pub fn to_tree(state: &State, recipe: &Recipe) -> Result<(), String> {
-    let analysis = Analysis::from_recipe(state, recipe);
+    fn to_tree_helper(&mut self, path: Path, vec: &mut Vec<BackwardTree>) -> usize {
+        let mut size = 0;
+        let mut children = Vec::new();
+        let mut ingredients;
+        match path.start {
+            Input::Ingredients { list } => {
+                size = list.len();
+                ingredients = list;
+            }
+            Input::Join { point } => {
+                ingredients = Vec::new();
+                let paths = self.map.remove(&Some(point.value)).unwrap();
+                for path in paths.into_iter() {
+                    size += self.to_tree_helper(path, &mut children);
+                }
+            }
+        }
+        vec.push(BackwardTree {
+            paths: children,
+            actions: path.actions,
+            ingredients: ingredients,
+            size: size,
+        });
+        size
+    }
 
-    analysis.debug(&mut io::stdout(), state).unwrap();
-    analysis.debug_problems(&mut io::stdout(), state).unwrap();
-
-    Ok(())
+    pub fn into_tree(mut self) -> BackwardTree {
+        let mut b = BackwardTree {
+            paths: vec![],
+            actions: Vec::new(),
+            ingredients: Vec::new(),
+            size: 0,
+        };
+        let paths = self.map.remove(&None).unwrap();
+        for path in paths.into_iter() {
+            b.size += self.to_tree_helper(path, &mut b.paths);
+        }
+        b
+    }
 }

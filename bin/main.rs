@@ -15,6 +15,8 @@ fn main() {
     println!("{:?}", recipe);
     assert!(recipe.is_ok());
     let recipe = recipe.unwrap();
-    assert!(checks::to_tree(&s, &recipe).is_ok());
     s.debug_recipe(&mut std::io::stdout(), &recipe).unwrap();
+    let analysis = checks::Analysis::from_recipe(&s, &recipe);
+    let tree = analysis.into_tree();
+    tree.debug(&mut std::io::stdout(), &s);
 }
