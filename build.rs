@@ -60,6 +60,18 @@ fn test_%PREFIX%() {
     std::str::from_utf8(&buf).unwrap().trim(),
     include_str!(\"%ROOT%/tests/%PREFIX%.problems\").trim(),
   );
+
+  let bt_path = std::path::Path::new(\"%ROOT%/tests/%PREFIX%.backward_tree\");
+  if bt_path.exists() {
+    let expected = std::fs::read_to_string(bt_path).unwrap();
+    let tree = analysis.into_tree().expect(\"Had a valid backward tree test but cannot build a tree\");
+    let mut buf = Vec::new();
+    tree.debug(&mut buf, &s).unwrap();
+    assert_eq(
+      std::str::from_utf8(&buf).unwrap().trim(),
+      expected.trim(),
+    );
+  }
 }
 ";
 

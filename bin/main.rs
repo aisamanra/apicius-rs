@@ -17,6 +17,6 @@ fn main() {
     let recipe = recipe.unwrap();
     s.debug_recipe(&mut std::io::stdout(), &recipe).unwrap();
     let analysis = checks::Analysis::from_recipe(&s, &recipe);
-    let tree = analysis.into_tree();
-    tree.debug(&mut std::io::stdout(), &s);
+    let tree = analysis.into_tree().unwrap();
+    tree.debug(&mut std::io::stdout(), &s).unwrap();
 }

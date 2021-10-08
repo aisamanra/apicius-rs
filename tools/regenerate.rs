@@ -24,6 +24,14 @@ fn main() {
 
                 let mut f = std::fs::File::create(exp_filename("problems")).unwrap();
                 a.debug_problems(&mut f, &state).unwrap();
+
+                let bt_path = exp_filename("backward_tree");
+                if let Some(tree) = a.into_tree() {
+                    let mut f = std::fs::File::create(bt_path).unwrap();
+                    tree.debug(&mut f, &state).unwrap();
+                } else if bt_path.exists() {
+                    std::fs::remove_file(bt_path).unwrap();
+                }
             }
         }
     }

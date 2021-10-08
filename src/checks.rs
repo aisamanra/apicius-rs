@@ -218,7 +218,11 @@ impl Analysis {
         size
     }
 
-    pub fn into_tree(mut self) -> BackwardTree {
+    pub fn into_tree(mut self) -> Option<BackwardTree> {
+        if !self.problems.is_empty() {
+            return None;
+        }
+
         let mut b = BackwardTree {
             paths: vec![],
             actions: Vec::new(),
@@ -229,6 +233,6 @@ impl Analysis {
         for path in paths.into_iter() {
             b.size += self.to_tree_helper(path, &mut b.paths);
         }
-        b
+        Some(b)
     }
 }
