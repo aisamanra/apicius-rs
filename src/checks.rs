@@ -36,7 +36,7 @@ pub enum Problem {
 /// recipe. The `map` here maps join points to all the sequences of
 /// actions which lead to them. For example, in a recipe like this:
 ///
-/// ```
+/// ```apicius
 /// sample {
 ///   one -> foo -> $a;
 ///   two -> bar -> $a;
@@ -47,7 +47,7 @@ pub enum Problem {
 ///
 /// we'll end up with a `map` that looks like
 ///
-/// ```
+/// ```yaml
 /// Some('$a'):
 ///   - input: one
 ///     steps: ['foo']
@@ -70,7 +70,7 @@ pub struct Analysis {
 /// input lines lead into it, because that's important for
 /// drawing. For example, for this example graph
 ///
-/// ```
+/// ```apicius
 /// sample {
 ///   one -> foo -> $a;
 ///   two -> bar -> $a;
@@ -81,7 +81,7 @@ pub struct Analysis {
 ///
 /// we'll end up with a `BackwardTree` that looks like this
 ///
-/// ```
+/// ```yaml
 /// actions: []
 /// size: 3
 /// paths:
