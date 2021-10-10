@@ -10,19 +10,98 @@ struct Path {
     start: Input,
 }
 
+/// A `Problem` represents the failing of an invariant we want to
+/// maintain.
+///
+/// TODO:
+///  - Better display of cycles
+///  - Discovering disconnected parts of the graph
 #[derive(Debug)]
-enum Problem {
+pub enum Problem {
+    /// Every recipe needs a `<>` so we can work backwards from it, so
+    /// it's an error to omit the `<>` value
     NoDone,
+    /// If the last thing in a sequence of actions is not a join point
+    /// or `<>`, then those actions are effectively useless
+    ///
+    /// TODO: detect this after `<>` and not just after join points
     DanglingSteps(Vec<ActionStep>, Input),
+    /// We want our recipes to be strictly tree-shaped, so disallow
+    /// any cycles. We might lift this restriction in the future, but
+    /// it's a _huge_ simplifying assumption for recipe graphing.
     HasCycle(string_interner::DefaultSymbol),
 }
 
+/// A representation of the straightforward analysis we do on a
+/// recipe. The `map` here maps join points to all the sequences of
+/// actions which lead to them. For example, in a recipe like this:
+///
+/// ```
+/// sample {
+///   one -> foo -> $a;
+///   two -> bar -> $a;
+///   $a -> baz -> <>;
+///   three -> quux -> <>;
+/// }
+/// ```
+///
+/// we'll end up with a `map` that looks like
+///
+/// ```
+/// Some('$a'):
+///   - input: one
+///     steps: ['foo']
+///   - input: two
+///     steps: ['bar']
+/// None:
+///   - input: '$a'
+///     steps: ['baz']
+///   - input: three
+///     steps: ['quux']
+/// ```
 #[derive(Debug)]
 pub struct Analysis {
     map: BTreeMap<Option<string_interner::DefaultSymbol>, Vec<Path>>,
     problems: Vec<Problem>,
 }
 
+/// This is the "backwards" version of the recipe, starting from the
+/// root. The 'size' parameter here corresponds to how many distinct
+/// input lines lead into it, because that's important for
+/// drawing. For example, for this example graph
+///
+/// ```
+/// sample {
+///   one -> foo -> $a;
+///   two -> bar -> $a;
+///   $a -> baz -> <>;
+///   three -> quux -> <>;
+/// }
+/// ```
+///
+/// we'll end up with a `BackwardTree` that looks like this
+///
+/// ```
+/// actions: []
+/// size: 3
+/// paths:
+///   - actions: ['quux']
+///     ingredients: ['three']
+///     size: 2
+///     paths:
+///       - actions: ['foo']
+///         ingredients: ['one']
+///         size: 1
+///         paths: []
+///       - actions: ['bar']
+///         ingredients: ['two']
+///         size: 1
+///         paths: []
+///   - actions: ['quux']
+///     ingredients: ['three']
+///     size: 1
+///     paths: []
+/// ```
 #[derive(Debug)]
 pub struct BackwardTree {
     pub actions: Vec<ActionStep>,
@@ -32,6 +111,7 @@ pub struct BackwardTree {
 }
 
 impl BackwardTree {
+    /// Print a `BackwardTree` to the writer
     pub fn debug(&self, w: &mut impl io::Write, s: &State) -> io::Result<()> {
         self.debug_helper(w, s, 0)
     }
@@ -54,6 +134,8 @@ impl BackwardTree {
 }
 
 impl Analysis {
+    /// Add a new `Path` that leads to a given join point (or the root
+    /// for `None`)
     fn add(&mut self, key: Option<StringRef>, value: Path) {
         self.map
             .entry(key.map(|x| *x))
@@ -61,6 +143,7 @@ impl Analysis {
             .push(value);
     }
 
+    /// Print the `Analysis` to the provided writer
     pub fn debug(&self, w: &mut impl io::Write, state: &State) -> io::Result<()> {
         writeln!(w, "analysis {{")?;
         for (k, v) in self.map.iter() {
@@ -82,6 +165,8 @@ impl Analysis {
         writeln!(w, "}}")
     }
 
+    /// Print the list of `Problem` values for this `Analysis` to the
+    /// given writer
     pub fn debug_problems(&self, w: &mut impl io::Write, state: &State) -> io::Result<()> {
         if self.problems.is_empty() {
             writeln!(w, "graph ok")?;
@@ -122,7 +207,13 @@ impl Analysis {
         Ok(())
     }
 
+    /// Find all cycles in the graph.
+    /// TODO: also find disconnected components here
+    /// TODO: print more of the cycle to make it easier to diagnose,
+    /// instead of just, "Hey, here's a node that's involved in a
+    /// cycle."
     pub fn find_cycles(&mut self) {
+        // this is just doing DFS with an explicit stack
         let mut frontier: Vec<string_interner::DefaultSymbol> = Vec::new();
         let mut seen = BTreeSet::new();
 
@@ -146,6 +237,10 @@ impl Analysis {
         }
     }
 
+    /// Take a `Recipe` and produce an `Analysis` value from it. This
+    /// will still produce an `Analysis` even if there are problems
+    /// found with it, but any `Analysis` that has non-zero problems
+    /// cannot be turned into a `BackwardTree`.
     pub fn from_recipe(state: &State, recipe: &Recipe) -> Self {
         let mut analysis = Analysis {
             map: BTreeMap::new(),
@@ -218,9 +313,14 @@ impl Analysis {
         size
     }
 
-    pub fn into_tree(mut self) -> Option<BackwardTree> {
+    /// Take an `Analysis` value and convert it into a
+    /// `BackwardTree`. This reuses some of the same backing memory
+    /// and therefore consumes the `Analysis`. If this can't be turned
+    /// into a `BackwardTree`, then this will instead return the
+    /// vector of problems with it
+    pub fn into_tree(mut self) -> Result<BackwardTree, Vec<Problem>> {
         if !self.problems.is_empty() {
-            return None;
+            return Err(self.problems);
         }
 
         let mut b = BackwardTree {
@@ -233,6 +333,6 @@ impl Analysis {
         for path in paths.into_iter() {
             b.size += self.to_tree_helper(path, &mut b.paths);
         }
-        Some(b)
+        Ok(b)
     }
 }
