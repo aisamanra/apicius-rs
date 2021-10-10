@@ -5,6 +5,7 @@ fn main() {
         let exp = exp.unwrap().path().canonicalize().unwrap();
         let fname = exp.file_name().unwrap().to_string_lossy();
         if let Some(prefix) = fname.strip_suffix(".apicius") {
+            println!("regenerating {}.apicius", prefix);
             let exp_filename = |new_suffix| {
                 let mut f = exp.clone();
                 f.pop();
