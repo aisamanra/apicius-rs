@@ -287,7 +287,7 @@ impl Analysis {
         analysis
     }
 
-    fn to_tree_helper(&mut self, path: Path, vec: &mut Vec<BackwardTree>) -> usize {
+    fn into_tree_helper(&mut self, path: Path, vec: &mut Vec<BackwardTree>) -> usize {
         let mut size = 0;
         let mut children = Vec::new();
         let mut ingredients;
@@ -300,7 +300,7 @@ impl Analysis {
                 ingredients = Vec::new();
                 let paths = self.map.remove(&Some(point.value)).unwrap();
                 for path in paths.into_iter() {
-                    size += self.to_tree_helper(path, &mut children);
+                    size += self.into_tree_helper(path, &mut children);
                 }
             }
         }
@@ -331,7 +331,7 @@ impl Analysis {
         };
         let paths = self.map.remove(&None).unwrap();
         for path in paths.into_iter() {
-            b.size += self.to_tree_helper(path, &mut b.paths);
+            b.size += self.into_tree_helper(path, &mut b.paths);
         }
         Ok(b)
     }
