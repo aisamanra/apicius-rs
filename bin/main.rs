@@ -19,4 +19,10 @@ fn main() {
     let analysis = checks::Analysis::from_recipe(&s, &recipe);
     let tree = analysis.into_tree().unwrap();
     tree.debug(&mut std::io::stdout(), &s).unwrap();
+    let table = apicius::render::table::TableGenerator::new(&s, &tree).compute();
+    {
+        use std::io::Write;
+        let mut f = std::fs::File::create("samp.html").unwrap();
+        write!(&mut f, "{}", table).unwrap();
+    }
 }

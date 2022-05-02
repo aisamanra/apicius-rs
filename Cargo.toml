@@ -31,7 +31,6 @@ pangocairo = "*"
 [dev-dependencies]
 pretty_assertions = "*"
 
-
 [build-dependencies.lalrpop]
 version = "*"
 features = ["lexer"]
