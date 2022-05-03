@@ -28,7 +28,10 @@ impl<'a> TableGenerator<'a> {
     fn render_ingredient(&self, i: IngredientRef) -> String {
         let i = &self.state[i];
         if let Some(amt) = i.amount {
-            format!("<span class=\"amt\">{}</span> {}", &self.state[amt], &self.state[i.stuff])
+            format!(
+                "<span class=\"amt\">{}</span> {}",
+                &self.state[amt], &self.state[i.stuff]
+            )
         } else {
             format!("{}", &self.state[i.stuff])
         }
@@ -66,7 +69,8 @@ impl<'a> TableGenerator<'a> {
             for a in focus.actions.iter() {
                 vec[0].push(format!(
                     "<td rowspan=\"{}\" class=\"action\">{}</td>",
-                    focus.size, self.render_action(a)
+                    focus.size,
+                    self.render_action(a)
                 ));
             }
         }
@@ -75,12 +79,16 @@ impl<'a> TableGenerator<'a> {
             for mut row in self.compute_helper(&path, focus.max_depth - focus.actions.len() + 1) {
                 if first {
                     if focus.actions.is_empty() && focus.ingredients.is_empty() {
-                        row.push(format!("<td rowspan=\"{}\" class=\"done\"></td>", focus.size));
+                        row.push(format!(
+                            "<td rowspan=\"{}\" class=\"done\"></td>",
+                            focus.size
+                        ));
                     } else {
                         for a in focus.actions.iter() {
                             row.push(format!(
                                 "<td rowspan=\"{}\">{}</td>",
-                                focus.size, self.render_action(a)
+                                focus.size,
+                                self.render_action(a)
                             ))
                         }
                     }
