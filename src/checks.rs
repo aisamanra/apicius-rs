@@ -1,3 +1,4 @@
+use std::cmp::max;
 use std::collections::{BTreeMap, BTreeSet};
 use std::io;
 
@@ -108,18 +109,74 @@ pub struct BackwardTree {
     pub paths: Vec<BackwardTree>,
     pub ingredients: Vec<IngredientRef>,
     pub size: usize,
+    pub max_depth: usize,
 }
 
 impl BackwardTree {
+    pub fn debug_raw(&self, w: &mut impl io::Write, s: &State) -> io::Result<()> {
+        writeln!(w, "backward_tree {{")?;
+        self.debug_raw_helper(w, s, 2)?;
+        writeln!(w, "}}")
+    }
+
+    pub fn debug_raw_helper(
+        &self,
+        w: &mut impl io::Write,
+        s: &State,
+        depth: usize,
+    ) -> io::Result<()> {
+        self.indent(w, depth - 1)?;
+        writeln!(w, "Node {{")?;
+
+        self.indent(w, depth)?;
+        writeln!(w, "size: {}", self.size)?;
+
+        self.indent(w, depth)?;
+        writeln!(w, "max_depth: {}", self.max_depth)?;
+
+        self.indent(w, depth)?;
+        write!(w, "ingredients: [")?;
+        s.debug_ingredients(w, &self.ingredients);
+        writeln!(w, "]")?;
+
+        self.indent(w, depth)?;
+        write!(w, "actions: [")?;
+        for a in self.actions.iter() {
+            s.debug_action_step(w, a)?;
+        }
+        writeln!(w, "]")?;
+
+        self.indent(w, depth)?;
+        if self.paths.is_empty() {
+            writeln!(w, "children: []")?;
+        } else {
+            writeln!(w, "children: [")?;
+            for c in self.paths.iter() {
+                c.debug_raw_helper(w, s, depth + 2)?;
+            }
+
+            self.indent(w, depth)?;
+            writeln!(w, "]")?;
+        }
+
+        self.indent(w, depth - 1)?;
+        writeln!(w, "}}")
+    }
+
+    fn indent(&self, w: &mut impl io::Write, depth: usize) -> io::Result<()> {
+        for _ in 0..depth {
+            write!(w, "  ")?
+        }
+        Ok(())
+    }
+
     /// Print a `BackwardTree` to the writer
     pub fn debug(&self, w: &mut impl io::Write, s: &State) -> io::Result<()> {
         self.debug_helper(w, s, 0)
     }
 
     pub fn debug_helper(&self, w: &mut impl io::Write, s: &State, depth: usize) -> io::Result<()> {
-        for _ in 0..depth {
-            write!(w, "  ")?;
-        }
+        self.indent(w, depth)?;
         for a in self.actions.iter() {
             s.debug_action_step(w, a)?;
             write!(w, " -> ")?;
@@ -287,10 +344,11 @@ impl Analysis {
         analysis
     }
 
-    fn into_tree_helper(&mut self, path: Path, vec: &mut Vec<BackwardTree>) -> usize {
+    fn into_tree_helper(&mut self, path: Path, vec: &mut Vec<BackwardTree>) -> (usize, usize) {
         let mut size = 0;
         let mut children = Vec::new();
         let mut ingredients;
+        let mut max_depth = 0;
         match path.start {
             Input::Ingredients { list } => {
                 size = list.len();
@@ -300,17 +358,21 @@ impl Analysis {
                 ingredients = Vec::new();
                 let paths = self.map.remove(&Some(point.value)).unwrap();
                 for path in paths.into_iter() {
-                    size += self.into_tree_helper(path, &mut children);
+                    let (ns, nd) = self.into_tree_helper(path, &mut children);
+                    size += ns;
+                    max_depth = max(max_depth, nd);
                 }
             }
         }
+        max_depth = max(path.actions.len(), max_depth);
         vec.push(BackwardTree {
             paths: children,
             actions: path.actions,
             ingredients: ingredients,
             size: size,
+            max_depth: max_depth,
         });
-        size
+        (size, max_depth)
     }
 
     /// Take an `Analysis` value and convert it into a
@@ -328,10 +390,13 @@ impl Analysis {
             actions: Vec::new(),
             ingredients: Vec::new(),
             size: 0,
+            max_depth: 0,
         };
         let paths = self.map.remove(&None).unwrap();
         for path in paths.into_iter() {
-            b.size += self.into_tree_helper(path, &mut b.paths);
+            let (ns, nd) = self.into_tree_helper(path, &mut b.paths);
+            b.size += ns;
+            b.max_depth = max(b.max_depth, nd);
         }
         Ok(b)
     }

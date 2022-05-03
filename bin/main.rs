@@ -18,7 +18,7 @@ fn main() {
     s.debug_recipe(&mut std::io::stdout(), &recipe).unwrap();
     let analysis = checks::Analysis::from_recipe(&s, &recipe);
     let tree = analysis.into_tree().unwrap();
-    tree.debug(&mut std::io::stdout(), &s).unwrap();
+    tree.debug_raw(&mut std::io::stdout(), &s).unwrap();
     let table = apicius::render::table::TableGenerator::new(&s, &tree).compute();
     {
         use std::io::Write;
