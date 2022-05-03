@@ -38,9 +38,10 @@ impl<'a> TableGenerator<'a> {
         let mut buf = String::new();
         buf.push_str(&self.state[a.action]);
         if !a.seasonings.is_empty() {
-            buf.push_str("<div class=\"seasonings\">");
+            buf.push_str("<div class=\"seasonings\">+");
             for i in a.seasonings.iter() {
                 buf.push_str(&self.render_ingredient(*i));
+                buf.push_str(" ");
             }
             buf.push_str("</div>");
         }
@@ -71,7 +72,7 @@ impl<'a> TableGenerator<'a> {
         }
 
         for path in focus.paths.iter() {
-            for mut row in self.compute_helper(&path, focus.max_depth) {
+            for mut row in self.compute_helper(&path, focus.max_depth - focus.actions.len() + 1) {
                 if first {
                     if focus.actions.is_empty() && focus.ingredients.is_empty() {
                         row.push(format!("<td rowspan=\"{}\" class=\"done\"></td>", focus.size));
