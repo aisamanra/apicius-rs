@@ -1,5 +1,5 @@
 use crate::checks::BackwardTree;
-use crate::types::State;
+use crate::types::{ActionStep, IngredientRef, State};
 
 pub struct TableGenerator<'a> {
     state: &'a State,
@@ -25,32 +25,47 @@ impl<'a> TableGenerator<'a> {
         buf
     }
 
-    pub fn compute_helper(&self, focus: &'a BackwardTree, depth: usize) -> Vec<Vec<String>> {
+    fn render_ingredient(&self, i: IngredientRef) -> String {
+        let i = &self.state[i];
+        if let Some(amt) = i.amount {
+            format!("<span class=\"amt\">{}</span> {}", &self.state[amt], &self.state[i.stuff])
+        } else {
+            format!("{}", &self.state[i.stuff])
+        }
+    }
+
+    fn render_action(&self, a: &ActionStep) -> String {
+        let mut buf = String::new();
+        buf.push_str(&self.state[a.action]);
+        if !a.seasonings.is_empty() {
+            buf.push_str("<div class=\"seasonings\">");
+            for i in a.seasonings.iter() {
+                buf.push_str(&self.render_ingredient(*i));
+            }
+            buf.push_str("</div>");
+        }
+        buf
+    }
+
+    fn compute_helper(&self, focus: &'a BackwardTree, depth: usize) -> Vec<Vec<String>> {
         let mut vec = Vec::new();
         let mut first = true;
         let colspan = depth - focus.max_depth + 1;
 
         for i in focus.ingredients.iter() {
-            let mut buf = Vec::new();
-            self.state
-                .debug_ingredient(&mut buf, &self.state[*i])
-                .unwrap();
             let elem = format!(
                 "<td class=\"ingredient\" colspan=\"{}\">{}</td>",
                 colspan - 1,
-                std::str::from_utf8(&buf).unwrap()
+                self.render_ingredient(*i),
             );
             vec.push(vec![elem]);
         }
 
         if focus.paths.len() == 0 {
             for a in focus.actions.iter() {
-                let mut buf = Vec::new();
-                self.state.debug_action_step(&mut buf, a);
-                let action_str = std::str::from_utf8(&buf).unwrap();
                 vec[0].push(format!(
                     "<td rowspan=\"{}\" class=\"action\">{}</td>",
-                    focus.size, action_str
+                    focus.size, self.render_action(a)
                 ));
             }
         }
@@ -58,21 +73,16 @@ impl<'a> TableGenerator<'a> {
         for path in focus.paths.iter() {
             for mut row in self.compute_helper(&path, focus.max_depth) {
                 if first {
-                    let mut buf = Vec::new();
-                    for a in focus.actions.iter() {
-                        self.state.debug_action_step(&mut buf, a);
-                    }
-                    let action_str = std::str::from_utf8(&buf).unwrap();
-                    let done;
                     if focus.actions.is_empty() && focus.ingredients.is_empty() {
-                        done = " class=\"done\"";
+                        row.push(format!("<td rowspan=\"{}\" class=\"done\"></td>", focus.size));
                     } else {
-                        done = "";
+                        for a in focus.actions.iter() {
+                            row.push(format!(
+                                "<td rowspan=\"{}\">{}</td>",
+                                focus.size, self.render_action(a)
+                            ))
+                        }
                     }
-                    row.push(format!(
-                        "<td rowspan=\"{}\"{}>{}</td>",
-                        focus.size, done, action_str
-                    ));
                     first = false;
                 }
                 vec.push(row);

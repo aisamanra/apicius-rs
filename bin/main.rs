@@ -41,7 +41,7 @@ soondubu jigae {
      -> $broth
      -> boil &salt
      -> $tofu
-     -> cover with broth, simmer
+     -> cover with broth -> simmer
      -> $eggs
      -> cook 2m
      -> <>;
