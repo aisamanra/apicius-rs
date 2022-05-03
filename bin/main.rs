@@ -19,6 +19,8 @@ const HEADER: &str = "
       .done {
         background-color: #555;
       }
+      .amt { color: #555; }
+      .seasonings { color: #333; }
     </style>
 ";
 
