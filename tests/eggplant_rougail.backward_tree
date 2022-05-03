@@ -1,5 +1,33 @@
-
-  mix & [4 tbsp] oil -> 
-    scoop flesh, discard skin -> mash -> [2] eggplants
-    mince -> [2] white onions or shallots
-    mince -> [2] hot peppers
+backward_tree {
+  Node {
+    size: 3
+    max_depth: 2
+    children: [
+      Node {
+        size: 3
+        max_depth: 2
+        actions: [mix & [4 tbsp] oil]
+        children: [
+          Node {
+            size: 1
+            max_depth: 2
+            ingredients: [[2] eggplants]
+            actions: [scoop flesh, discard skinmash]
+          }
+          Node {
+            size: 1
+            max_depth: 1
+            ingredients: [[2] white onions or shallots]
+            actions: [mince]
+          }
+          Node {
+            size: 1
+            max_depth: 1
+            ingredients: [[2] hot peppers]
+            actions: [mince]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,4 +1,27 @@
-
-  stir & salt -> 
-    chop coarsely -> sautee & butter -> [1/2] onion + [1 clove] garlic
-    whisk -> [2] eggs
+backward_tree {
+  Node {
+    size: 3
+    max_depth: 2
+    children: [
+      Node {
+        size: 3
+        max_depth: 2
+        actions: [stir & salt]
+        children: [
+          Node {
+            size: 2
+            max_depth: 2
+            ingredients: [[1/2] onion + [1 clove] garlic]
+            actions: [chop coarselysautee & butter]
+          }
+          Node {
+            size: 1
+            max_depth: 1
+            ingredients: [[2] eggs]
+            actions: [whisk]
+          }
+        ]
+      }
+    ]
+  }
+}

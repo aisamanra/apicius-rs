@@ -134,22 +134,24 @@ impl BackwardTree {
         self.indent(w, depth)?;
         writeln!(w, "max_depth: {}", self.max_depth)?;
 
-        self.indent(w, depth)?;
-        write!(w, "ingredients: [")?;
-        s.debug_ingredients(w, &self.ingredients);
-        writeln!(w, "]")?;
-
-        self.indent(w, depth)?;
-        write!(w, "actions: [")?;
-        for a in self.actions.iter() {
-            s.debug_action_step(w, a)?;
+        if !self.ingredients.is_empty() {
+            self.indent(w, depth)?;
+            write!(w, "ingredients: [")?;
+            s.debug_ingredients(w, &self.ingredients);
+            writeln!(w, "]")?;
         }
-        writeln!(w, "]")?;
 
-        self.indent(w, depth)?;
-        if self.paths.is_empty() {
-            writeln!(w, "children: []")?;
-        } else {
+        if !self.actions.is_empty() {
+            self.indent(w, depth)?;
+            write!(w, "actions: [")?;
+            for a in self.actions.iter() {
+                s.debug_action_step(w, a)?;
+            }
+            writeln!(w, "]")?;
+        }
+
+        if !self.paths.is_empty() {
+            self.indent(w, depth)?;
             writeln!(w, "children: [")?;
             for c in self.paths.iter() {
                 c.debug_raw_helper(w, s, depth + 2)?;
@@ -347,7 +349,7 @@ impl Analysis {
     fn into_tree_helper(&mut self, path: Path, vec: &mut Vec<BackwardTree>) -> (usize, usize) {
         let mut size = 0;
         let mut children = Vec::new();
-        let mut ingredients;
+        let ingredients;
         let mut max_depth = 0;
         match path.start {
             Input::Ingredients { list } => {

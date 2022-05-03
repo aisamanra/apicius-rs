@@ -1,14 +1,88 @@
-
-  cook 2m -> 
-    cover with broth, simmer -> 
-      boil & salt -> 
-        simmer 2m -> 
-          stir & salt -> 
-            cook 1m -> 
-              dice -> cook 5m -> [1/2] yellow onion
-              [2 tbsp] chili paste
-            dice -> [1] zucchini
-          chop coarsely -> [1 cup] kimchi
-        [2 cups] beef or chicken broth + [1 tsp] soy sauce
-      [16oz] silken tofu
-    [3] eggs
+backward_tree {
+  Node {
+    size: 8
+    max_depth: 2
+    children: [
+      Node {
+        size: 8
+        max_depth: 2
+        actions: [cook 2m]
+        children: [
+          Node {
+            size: 7
+            max_depth: 2
+            actions: [cover with broth, simmer]
+            children: [
+              Node {
+                size: 6
+                max_depth: 2
+                actions: [boil & salt]
+                children: [
+                  Node {
+                    size: 4
+                    max_depth: 2
+                    actions: [simmer 2m]
+                    children: [
+                      Node {
+                        size: 3
+                        max_depth: 2
+                        actions: [stir & salt]
+                        children: [
+                          Node {
+                            size: 2
+                            max_depth: 2
+                            actions: [cook 1m]
+                            children: [
+                              Node {
+                                size: 1
+                                max_depth: 2
+                                ingredients: [[1/2] yellow onion]
+                                actions: [dicecook 5m]
+                              }
+                              Node {
+                                size: 1
+                                max_depth: 0
+                                ingredients: [[2 tbsp] chili paste]
+                              }
+                            ]
+                          }
+                          Node {
+                            size: 1
+                            max_depth: 1
+                            ingredients: [[1] zucchini]
+                            actions: [dice]
+                          }
+                        ]
+                      }
+                      Node {
+                        size: 1
+                        max_depth: 1
+                        ingredients: [[1 cup] kimchi]
+                        actions: [chop coarsely]
+                      }
+                    ]
+                  }
+                  Node {
+                    size: 2
+                    max_depth: 0
+                    ingredients: [[2 cups] beef or chicken broth + [1 tsp] soy sauce]
+                  }
+                ]
+              }
+              Node {
+                size: 1
+                max_depth: 0
+                ingredients: [[16oz] silken tofu]
+              }
+            ]
+          }
+          Node {
+            size: 1
+            max_depth: 0
+            ingredients: [[3] eggs]
+          }
+        ]
+      }
+    ]
+  }
+}
