@@ -13,27 +13,33 @@ impl<'a> TableGenerator<'a> {
 
     pub fn compute(&self) -> String {
         let mut buf = String::new();
-        buf.push_str("<table border='1'>");
+        buf.push_str("<table border='1'>\n");
         for row in self.compute_helper(&self.bt, self.bt.max_depth) {
-            buf.push_str("<tr>");
+            buf.push_str("  <tr>");
             for cell in row {
                 buf.push_str(&cell);
             }
-            buf.push_str("</tr>");
+            buf.push_str("</tr>\n");
         }
-        buf.push_str("</table>");
+        buf.push_str("</table>\n");
         buf
     }
 
     pub fn compute_helper(&self, focus: &'a BackwardTree, depth: usize) -> Vec<Vec<String>> {
         let mut vec = Vec::new();
         let mut first = true;
+        let colspan = depth - focus.max_depth + 1;
+
         for i in focus.ingredients.iter() {
             let mut buf = Vec::new();
             self.state
                 .debug_ingredient(&mut buf, &self.state[*i])
                 .unwrap();
-            let elem = format!("<td class=\"ingredient\">{}</td>", std::str::from_utf8(&buf).unwrap());
+            let elem = format!(
+                "<td class=\"ingredient\" colspan=\"{}\">{}</td>",
+                colspan - 1,
+                std::str::from_utf8(&buf).unwrap()
+            );
             vec.push(vec![elem]);
         }
 
@@ -42,10 +48,9 @@ impl<'a> TableGenerator<'a> {
                 let mut buf = Vec::new();
                 self.state.debug_action_step(&mut buf, a);
                 let action_str = std::str::from_utf8(&buf).unwrap();
-                let colspan = depth - focus.max_depth + 1;
                 vec[0].push(format!(
-                    "<td rowspan=\"{}\" colspan=\"{}\" class=\"action\"/>{}</td>",
-                    focus.size, colspan, action_str
+                    "<td rowspan=\"{}\" class=\"action\">{}</td>",
+                    focus.size, action_str
                 ));
             }
         }
@@ -65,7 +70,7 @@ impl<'a> TableGenerator<'a> {
                         done = "";
                     }
                     row.push(format!(
-                        "<td rowspan=\"{}\"{}/>{}</td>",
+                        "<td rowspan=\"{}\"{}>{}</td>",
                         focus.size, done, action_str
                     ));
                     first = false;

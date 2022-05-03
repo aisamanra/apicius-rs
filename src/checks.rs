@@ -366,7 +366,7 @@ impl Analysis {
                 }
             }
         }
-        max_depth = max(path.actions.len(), max_depth);
+        max_depth = path.actions.len() + max_depth;
         vec.push(BackwardTree {
             paths: children,
             actions: path.actions,

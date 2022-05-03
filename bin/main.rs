@@ -28,11 +28,30 @@ const FOOTER: &str = "
 ";
 
 const SAMPLE: &str = "
-nicer scrambled eggs {
-  [1/2] onion + [1 clove] garlic
-    -> chop coarsely -> sautee & butter -> $mix;
-  [2] eggs -> whisk -> $mix;
-  $mix -> stir & salt -> <>;
+soondubu jigae {
+  [1/2] yellow onion
+     -> dice
+     -> cook 5m
+     -> $chili
+     -> cook 1m
+     -> $zucchini
+     -> stir &salt
+     -> $kimchi
+     -> simmer 2m
+     -> $broth
+     -> boil &salt
+     -> $tofu
+     -> cover with broth, simmer
+     -> $eggs
+     -> cook 2m
+     -> <>;
+  [2 tbsp] chili paste -> $chili;
+  [1] zucchini -> dice -> $zucchini;
+  [1 cup] kimchi -> chop coarsely -> $kimchi;
+  [2 cups] beef or chicken broth + [1 tsp] soy sauce
+    -> $broth;
+  [16oz] silken tofu -> $tofu;
+  [3] eggs -> $eggs;
 }
 ";
 

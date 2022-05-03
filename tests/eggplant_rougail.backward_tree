@@ -1,11 +1,11 @@
 backward_tree {
   Node {
     size: 3
-    max_depth: 2
+    max_depth: 3
     children: [
       Node {
         size: 3
-        max_depth: 2
+        max_depth: 3
         actions: [mix & [4 tbsp] oil]
         children: [
           Node {

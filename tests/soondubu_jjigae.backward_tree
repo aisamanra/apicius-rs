@@ -1,36 +1,36 @@
 backward_tree {
   Node {
     size: 8
-    max_depth: 2
+    max_depth: 8
     children: [
       Node {
         size: 8
-        max_depth: 2
+        max_depth: 8
         actions: [cook 2m]
         children: [
           Node {
             size: 7
-            max_depth: 2
+            max_depth: 7
             actions: [cover with broth, simmer]
             children: [
               Node {
                 size: 6
-                max_depth: 2
+                max_depth: 6
                 actions: [boil & salt]
                 children: [
                   Node {
                     size: 4
-                    max_depth: 2
+                    max_depth: 5
                     actions: [simmer 2m]
                     children: [
                       Node {
                         size: 3
-                        max_depth: 2
+                        max_depth: 4
                         actions: [stir & salt]
                         children: [
                           Node {
                             size: 2
-                            max_depth: 2
+                            max_depth: 3
                             actions: [cook 1m]
                             children: [
                               Node {
