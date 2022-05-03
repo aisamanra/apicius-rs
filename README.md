@@ -73,6 +73,6 @@ And also a table-based display like this:
 ## Plan
 
 - [X] Implement basic Apicius parser
-- [ ] Implement recipe verification and analysis
+- [X] Implement recipe verification and analysis
 - [ ] Implement graph display
-- [ ] Implement chart display
+- [X] Implement chart display
