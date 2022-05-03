@@ -137,7 +137,7 @@ impl BackwardTree {
         if !self.ingredients.is_empty() {
             self.indent(w, depth)?;
             write!(w, "ingredients: [")?;
-            s.debug_ingredients(w, &self.ingredients);
+            s.debug_ingredients(w, &self.ingredients)?;
             writeln!(w, "]")?;
         }
 
@@ -346,7 +346,7 @@ impl Analysis {
         analysis
     }
 
-    fn into_tree_helper(&mut self, path: Path, vec: &mut Vec<BackwardTree>) -> (usize, usize) {
+    fn convert_tree_helper(&mut self, path: Path, vec: &mut Vec<BackwardTree>) -> (usize, usize) {
         let mut size = 0;
         let mut children = Vec::new();
         let ingredients;
@@ -360,19 +360,19 @@ impl Analysis {
                 ingredients = Vec::new();
                 let paths = self.map.remove(&Some(point.value)).unwrap();
                 for path in paths.into_iter() {
-                    let (ns, nd) = self.into_tree_helper(path, &mut children);
+                    let (ns, nd) = self.convert_tree_helper(path, &mut children);
                     size += ns;
                     max_depth = max(max_depth, nd);
                 }
             }
         }
-        max_depth = path.actions.len() + max_depth;
+        max_depth += path.actions.len();
         vec.push(BackwardTree {
             paths: children,
             actions: path.actions,
-            ingredients: ingredients,
-            size: size,
-            max_depth: max_depth,
+            ingredients,
+            size,
+            max_depth,
         });
         (size, max_depth)
     }
@@ -396,7 +396,7 @@ impl Analysis {
         };
         let paths = self.map.remove(&None).unwrap();
         for path in paths.into_iter() {
-            let (ns, nd) = self.into_tree_helper(path, &mut b.paths);
+            let (ns, nd) = self.convert_tree_helper(path, &mut b.paths);
             b.size += ns;
             b.max_depth = max(b.max_depth, nd);
         }

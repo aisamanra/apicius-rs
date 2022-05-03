@@ -14,7 +14,7 @@ impl<'a> TableGenerator<'a> {
     pub fn compute(&self) -> String {
         let mut buf = String::new();
         buf.push_str("<table border='1'>\n");
-        for row in self.compute_helper(&self.bt, self.bt.max_depth) {
+        for row in self.compute_helper(self.bt, self.bt.max_depth) {
             buf.push_str("  <tr>");
             for cell in row {
                 buf.push_str(&cell);
@@ -33,7 +33,7 @@ impl<'a> TableGenerator<'a> {
                 &self.state[amt], &self.state[i.stuff]
             )
         } else {
-            format!("{}", &self.state[i.stuff])
+            self.state[i.stuff].to_string()
         }
     }
 
@@ -44,7 +44,7 @@ impl<'a> TableGenerator<'a> {
             buf.push_str("<div class=\"seasonings\">+");
             for i in a.seasonings.iter() {
                 buf.push_str(&self.render_ingredient(*i));
-                buf.push_str(" ");
+                buf.push(' ');
             }
             buf.push_str("</div>");
         }
@@ -65,7 +65,7 @@ impl<'a> TableGenerator<'a> {
             vec.push(vec![elem]);
         }
 
-        if focus.paths.len() == 0 {
+        if focus.paths.is_empty() {
             for a in focus.actions.iter() {
                 vec[0].push(format!(
                     "<td rowspan=\"{}\" class=\"action\">{}</td>",
@@ -76,7 +76,7 @@ impl<'a> TableGenerator<'a> {
         }
 
         for path in focus.paths.iter() {
-            for mut row in self.compute_helper(&path, focus.max_depth - focus.actions.len() + 1) {
+            for mut row in self.compute_helper(path, focus.max_depth - focus.actions.len() + 1) {
                 if first {
                     if focus.actions.is_empty() && focus.ingredients.is_empty() {
                         row.push(format!(
