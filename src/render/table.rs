@@ -14,7 +14,7 @@ impl<'a> TableGenerator<'a> {
     pub fn compute(&self) -> String {
         let mut buf = String::new();
         buf.push_str("<table border='1'>");
-        for row in self.compute_helper(&self.bt) {
+        for row in self.compute_helper(&self.bt, self.bt.max_depth) {
             buf.push_str("<tr>");
             for cell in row {
                 buf.push_str(&cell);
@@ -25,10 +25,7 @@ impl<'a> TableGenerator<'a> {
         buf
     }
 
-    pub fn compute_helper(&self, focus: &'a BackwardTree) -> Vec<Vec<String>> {
-        println!("===");
-        focus.debug(&mut std::io::stdout(), self.state);
-        println!("===");
+    pub fn compute_helper(&self, focus: &'a BackwardTree, depth: usize) -> Vec<Vec<String>> {
         let mut vec = Vec::new();
         let mut first = true;
         for i in focus.ingredients.iter() {
@@ -36,7 +33,7 @@ impl<'a> TableGenerator<'a> {
             self.state
                 .debug_ingredient(&mut buf, &self.state[*i])
                 .unwrap();
-            let elem = format!("<td>{}</td>", std::str::from_utf8(&buf).unwrap());
+            let elem = format!("<td class=\"ingredient\">{}</td>", std::str::from_utf8(&buf).unwrap());
             vec.push(vec![elem]);
         }
 
@@ -45,24 +42,31 @@ impl<'a> TableGenerator<'a> {
                 let mut buf = Vec::new();
                 self.state.debug_action_step(&mut buf, a);
                 let action_str = std::str::from_utf8(&buf).unwrap();
+                let colspan = depth - focus.max_depth + 1;
                 vec[0].push(format!(
-                    "<td rowspan=\"{}\"/>{}</td>",
-                    focus.size, action_str
+                    "<td rowspan=\"{}\" colspan=\"{}\" class=\"action\"/>{}</td>",
+                    focus.size, colspan, action_str
                 ));
             }
         }
 
         for path in focus.paths.iter() {
-            for mut row in self.compute_helper(&path) {
+            for mut row in self.compute_helper(&path, focus.max_depth) {
                 if first {
                     let mut buf = Vec::new();
                     for a in focus.actions.iter() {
                         self.state.debug_action_step(&mut buf, a);
                     }
                     let action_str = std::str::from_utf8(&buf).unwrap();
+                    let done;
+                    if focus.actions.is_empty() && focus.ingredients.is_empty() {
+                        done = " class=\"done\"";
+                    } else {
+                        done = "";
+                    }
                     row.push(format!(
-                        "<td rowspan=\"{}\"/>{}</td>",
-                        focus.size, action_str
+                        "<td rowspan=\"{}\"{}/>{}</td>",
+                        focus.size, done, action_str
                     ));
                     first = false;
                 }

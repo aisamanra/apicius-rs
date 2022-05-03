@@ -1,5 +1,32 @@
 use apicius::{checks, grammar, types};
 
+const HEADER: &str = "
+<!DOCTYPE html>
+<html>
+  <body>
+    <style type=\"text/css\">
+      body { font-family: \"Fira Sans\", arial; }
+      td {
+        padding: 1em;
+      }
+      table, td, tr {
+        border: 2px solid;
+        border-spacing: 0px;
+      }
+      .ingredient {
+        background-color: #ddd;
+      }
+      .done {
+        background-color: #555;
+      }
+    </style>
+";
+
+const FOOTER: &str = "
+  </body>
+</html>
+";
+
 const SAMPLE: &str = "
 nicer scrambled eggs {
   [1/2] onion + [1 clove] garlic
@@ -23,6 +50,8 @@ fn main() {
     {
         use std::io::Write;
         let mut f = std::fs::File::create("samp.html").unwrap();
+        write!(&mut f, "{}", HEADER).unwrap();
         write!(&mut f, "{}", table).unwrap();
+        write!(&mut f, "{}", FOOTER).unwrap();
     }
 }
