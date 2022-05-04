@@ -29,7 +29,7 @@ Each of these has a simple goal:
 
 # The `State` Type
 
-Much of the `State` type is overkill. This project could have used a _much_ simpler set of data structures, but I wanted to use `apicius` as a testing ground for applying techniques I've used for high-performance compilers in [Sorbet]() before deploying them in a more complicated compiler setting.
+Much of the `State` type is overkill. This project could have used a _much_ simpler set of data structures, but I wanted to use `apicius` as a testing ground for applying techniques I've used for high-performance compilers in [Sorbet](https://blog.nelhage.com/post/why-sorbet-is-fast/) with Rust.
 
 So one thing that it does is it creates packed representations of most data and passes around `Ref` types which act as indices into those tables. In a compiler setting, this is a net win because it means we rarely do string comparisons except for during the initial interning: we theoretically benefit from that a _little_ here during the analysis phases, but we rarely deal with recipes large enough to really care.
 
