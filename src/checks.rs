@@ -331,7 +331,6 @@ impl Analysis {
     }
 }
 
-
 impl ToPrintable for BackwardTree {}
 
 impl<'a> fmt::Debug for Printable<'a, BackwardTree> {

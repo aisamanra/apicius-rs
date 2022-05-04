@@ -255,18 +255,18 @@ pub struct Printable<'a, T> {
     pub value: &'a T,
 }
 
-pub trait ToPrintable : Sized {
+pub trait ToPrintable: Sized {
     fn printable<'a>(&'a self, state: &'a State) -> Printable<'a, Self> {
-        Printable {
-            value: self,
-            state
-        }
+        Printable { value: self, state }
     }
 }
 
 impl<'a, T> Printable<'a, T> {
     pub fn from_val<R>(&self, value: &'a R) -> Printable<R> {
-        Printable { state: self.state, value }
+        Printable {
+            state: self.state,
+            value,
+        }
     }
 
     pub fn from_seq<R>(&self, seq: &'a [R]) -> Vec<Printable<R>> {
@@ -286,7 +286,6 @@ impl<'a> fmt::Debug for Printable<'a, IngredientRef> {
     }
 }
 
-
 impl ToPrintable for Ingredient {}
 
 impl<'a> fmt::Debug for Printable<'a, Ingredient> {
@@ -303,16 +302,11 @@ impl ToPrintable for Input {}
 impl<'a> fmt::Debug for Printable<'a, Input> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self.value {
-            Input::Ingredients { list } => {
-                f.debug_tuple("Ingredients")
-                    .field(&self.from_seq(&list))
-                    .finish()
-            }
-            Input::Join { point } => {
-                f.debug_tuple("Join")
-                    .field(&&self.state[*point])
-                    .finish()
-            }
+            Input::Ingredients { list } => f
+                .debug_tuple("Ingredients")
+                .field(&self.from_seq(&list))
+                .finish(),
+            Input::Join { point } => f.debug_tuple("Join").field(&&self.state[*point]).finish(),
         }
     }
 }

@@ -1,5 +1,5 @@
-use apicius::{checks, grammar, types};
 use apicius::types::ToPrintable;
+use apicius::{checks, grammar, types};
 
 const HEADER: &str = "
 <!DOCTYPE html>

@@ -1,6 +1,6 @@
 use apicius::{
     checks, grammar,
-    types::{ToPrintable, State},
+    types::{State, ToPrintable},
 };
 use std::io::Write;
 
