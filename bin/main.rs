@@ -1,4 +1,5 @@
 use apicius::{checks, grammar, types};
+use apicius::types::ToPrintable;
 
 const HEADER: &str = "
 <!DOCTYPE html>
@@ -65,6 +66,7 @@ fn main() {
     let recipe = recipe.unwrap();
     s.debug_recipe(&mut std::io::stdout(), &recipe).unwrap();
     let analysis = checks::Analysis::from_recipe(&s, &recipe);
+    println!("{:#?}", analysis.printable(&s));
     let tree = analysis.into_tree().unwrap();
 
     println!(

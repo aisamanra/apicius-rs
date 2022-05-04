@@ -1,6 +1,18 @@
-analysis {
-  DONE
-     <- serve <- $foo
-  $foo
-     <- bake <- eggs
-}
+None: [
+    [
+        Join(
+            "$foo",
+        ),
+        serve,
+    ],
+]
+$foo: [
+    [
+        Ingredients(
+            [
+                eggs,
+            ],
+        ),
+        bake,
+    ],
+]

@@ -1,22 +1,104 @@
-analysis {
-  DONE
-     <- cook 2m <- $eggs
-  $chili
-     <- dice <- cook 5m <- [1/2] yellow onion
-     <- [2 tbsp] chili paste
-  $zucchini
-     <- cook 1m <- $chili
-     <- dice <- [1] zucchini
-  $kimchi
-     <- stir <- $zucchini
-     <- chop coarsely <- [1 cup] kimchi
-  $broth
-     <- simmer 2m <- $kimchi
-     <- [2 cups] beef or chicken broth + [1 tsp] soy sauce
-  $tofu
-     <- boil <- $broth
-     <- [16oz] silken tofu
-  $eggs
-     <- cover with broth, simmer <- $tofu
-     <- [3] eggs
-}
+None: [
+    [
+        Join(
+            "$eggs",
+        ),
+        cook 2m,
+    ],
+]
+$chili: [
+    [
+        Ingredients(
+            [
+                [1/2]yellow onion,
+            ],
+        ),
+        dice,
+        cook 5m,
+    ],
+    [
+        Ingredients(
+            [
+                [2 tbsp]chili paste,
+            ],
+        ),
+    ],
+]
+$zucchini: [
+    [
+        Join(
+            "$chili",
+        ),
+        cook 1m,
+    ],
+    [
+        Ingredients(
+            [
+                [1]zucchini,
+            ],
+        ),
+        dice,
+    ],
+]
+$kimchi: [
+    [
+        Join(
+            "$zucchini",
+        ),
+        stir & [salt],
+    ],
+    [
+        Ingredients(
+            [
+                [1 cup]kimchi,
+            ],
+        ),
+        chop coarsely,
+    ],
+]
+$broth: [
+    [
+        Join(
+            "$kimchi",
+        ),
+        simmer 2m,
+    ],
+    [
+        Ingredients(
+            [
+                [2 cups]beef or chicken broth,
+                [1 tsp]soy sauce,
+            ],
+        ),
+    ],
+]
+$tofu: [
+    [
+        Join(
+            "$broth",
+        ),
+        boil & [salt],
+    ],
+    [
+        Ingredients(
+            [
+                [16oz]silken tofu,
+            ],
+        ),
+    ],
+]
+$eggs: [
+    [
+        Join(
+            "$tofu",
+        ),
+        cover with broth, simmer,
+    ],
+    [
+        Ingredients(
+            [
+                [3]eggs,
+            ],
+        ),
+    ],
+]

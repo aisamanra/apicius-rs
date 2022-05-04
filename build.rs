@@ -46,11 +46,12 @@ fn test_%PREFIX%() {
     include_str!(\"%ROOT%/tests/%PREFIX%.exp\").trim(),
   );
 
-  let mut buf = Vec::new();
   let analysis = checks::Analysis::from_recipe(&s, &recipe);
-  analysis.debug(&mut buf, &s).unwrap();
   assert_eq(
-    std::str::from_utf8(&buf).unwrap().trim(),
+    &format!(\"{:#?}\", Printable {
+      value: &analysis,
+      state: &s,
+    }).trim(),
     include_str!(\"%ROOT%/tests/%PREFIX%.analysis\").trim(),
   );
 

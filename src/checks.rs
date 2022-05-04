@@ -151,28 +151,6 @@ impl Analysis {
             .push(value);
     }
 
-    /// Print the `Analysis` to the provided writer
-    pub fn debug(&self, w: &mut impl io::Write, state: &State) -> io::Result<()> {
-        writeln!(w, "analysis {{")?;
-        for (k, v) in self.map.iter() {
-            if let Some(name) = k {
-                writeln!(w, "  {}", &state[*name])?;
-            } else {
-                writeln!(w, "  DONE")?;
-            }
-            for alt in v.iter() {
-                write!(w, "    ")?;
-                for a in alt.actions.iter() {
-                    write!(w, " <- {}", &state[a.action])?;
-                }
-                write!(w, " <- ")?;
-                state.debug_input(w, &alt.start).unwrap();
-                writeln!(w)?;
-            }
-        }
-        writeln!(w, "}}")
-    }
-
     /// Print the list of `Problem` values for this `Analysis` to the
     /// given writer
     pub fn debug_problems(&self, w: &mut impl io::Write, state: &State) -> io::Result<()> {
@@ -353,6 +331,9 @@ impl Analysis {
     }
 }
 
+
+impl ToPrintable for BackwardTree {}
+
 impl<'a> fmt::Debug for Printable<'a, BackwardTree> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut str = f.debug_struct("BackwardTree");
@@ -368,5 +349,34 @@ impl<'a> fmt::Debug for Printable<'a, BackwardTree> {
             str.field("paths", &self.from_seq(&self.value.paths));
         }
         str.finish()
+    }
+}
+
+impl ToPrintable for Path {}
+
+impl<'a> fmt::Debug for Printable<'a, Path> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut str = f.debug_list();
+        str.entry(&self.from_val(&self.value.start));
+        str.entries(&self.from_seq(&self.value.actions));
+        str.finish()
+    }
+}
+
+impl ToPrintable for Analysis {}
+
+impl<'a> fmt::Debug for Printable<'a, Analysis> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        for (key, value) in self.value.map.iter() {
+            if let Some(k) = key {
+                write!(f, "{}: ", &self.state[*k])?;
+            } else {
+                write!(f, "None: ")?;
+            }
+
+            self.from_seq(&value).fmt(f)?;
+            write!(f, "\n")?
+        }
+        Ok(())
     }
 }

@@ -1,9 +1,31 @@
-analysis {
-  DONE
-     <- $bar
-  $foo
-     <- bake <- eggs
-     <- and around <- $bar
-  $bar
-     <- around <- $foo
-}
+None: [
+    [
+        Join(
+            "$bar",
+        ),
+    ],
+]
+$foo: [
+    [
+        Ingredients(
+            [
+                eggs,
+            ],
+        ),
+        bake,
+    ],
+    [
+        Join(
+            "$bar",
+        ),
+        and around,
+    ],
+]
+$bar: [
+    [
+        Join(
+            "$foo",
+        ),
+        around,
+    ],
+]

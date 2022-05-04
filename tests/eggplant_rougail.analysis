@@ -1,8 +1,35 @@
-analysis {
-  DONE
-     <- mix <- $combine
-  $combine
-     <- scoop flesh, discard skin <- mash <- [2] eggplants
-     <- mince <- [2] white onions or shallots
-     <- mince <- [2] hot peppers
-}
+None: [
+    [
+        Join(
+            "$combine",
+        ),
+        mix & [[4 tbsp]oil],
+    ],
+]
+$combine: [
+    [
+        Ingredients(
+            [
+                [2]eggplants,
+            ],
+        ),
+        scoop flesh, discard skin,
+        mash,
+    ],
+    [
+        Ingredients(
+            [
+                [2]white onions or shallots,
+            ],
+        ),
+        mince,
+    ],
+    [
+        Ingredients(
+            [
+                [2]hot peppers,
+            ],
+        ),
+        mince,
+    ],
+]

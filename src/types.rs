@@ -255,16 +255,26 @@ pub struct Printable<'a, T> {
     pub value: &'a T,
 }
 
-impl<'a, T> Printable<'a, T> {
-    pub fn from_seq<R>(&self, seq: &'a [R]) -> Vec<Printable<R>> {
-        seq.iter()
-            .map(|value| Printable {
-                state: self.state,
-                value,
-            })
-            .collect()
+pub trait ToPrintable : Sized {
+    fn printable<'a>(&'a self, state: &'a State) -> Printable<'a, Self> {
+        Printable {
+            value: self,
+            state
+        }
     }
 }
+
+impl<'a, T> Printable<'a, T> {
+    pub fn from_val<R>(&self, value: &'a R) -> Printable<R> {
+        Printable { state: self.state, value }
+    }
+
+    pub fn from_seq<R>(&self, seq: &'a [R]) -> Vec<Printable<R>> {
+        seq.iter().map(|v| self.from_val(v)).collect()
+    }
+}
+
+impl ToPrintable for IngredientRef {}
 
 impl<'a> fmt::Debug for Printable<'a, IngredientRef> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -276,6 +286,9 @@ impl<'a> fmt::Debug for Printable<'a, IngredientRef> {
     }
 }
 
+
+impl ToPrintable for Ingredient {}
+
 impl<'a> fmt::Debug for Printable<'a, Ingredient> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         if let Some(amt) = self.value.amount {
@@ -285,9 +298,22 @@ impl<'a> fmt::Debug for Printable<'a, Ingredient> {
     }
 }
 
-impl Ingredient {
-    pub fn debug<'a>(&'a self, state: &'a State) -> Printable<'a, Ingredient> {
-        Printable { value: self, state }
+impl ToPrintable for Input {}
+
+impl<'a> fmt::Debug for Printable<'a, Input> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self.value {
+            Input::Ingredients { list } => {
+                f.debug_tuple("Ingredients")
+                    .field(&self.from_seq(&list))
+                    .finish()
+            }
+            Input::Join { point } => {
+                f.debug_tuple("Join")
+                    .field(&&self.state[*point])
+                    .finish()
+            }
+        }
     }
 }
 
@@ -301,6 +327,8 @@ impl<'a> fmt::Debug for Printable<'a, ActionStep> {
         Ok(())
     }
 }
+
+impl ToPrintable for ActionStep {}
 
 impl ActionStep {
     pub fn debug<'a>(&'a self, state: &'a State) -> Printable<'a, ActionStep> {

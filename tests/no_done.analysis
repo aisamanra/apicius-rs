@@ -1,5 +1,18 @@
-analysis {
-  $foo
-     <- bake <- egg
-     <- shake <- dirt
-}
+$foo: [
+    [
+        Ingredients(
+            [
+                egg,
+            ],
+        ),
+        bake,
+    ],
+    [
+        Ingredients(
+            [
+                dirt,
+            ],
+        ),
+        shake,
+    ],
+]

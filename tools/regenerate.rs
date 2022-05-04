@@ -1,6 +1,6 @@
 use apicius::{
     checks, grammar,
-    types::{Printable, State},
+    types::{ToPrintable, State},
 };
 use std::io::Write;
 
@@ -25,7 +25,7 @@ fn main() {
 
                 let mut f = std::fs::File::create(exp_filename("analysis")).unwrap();
                 let a = checks::Analysis::from_recipe(&state, &recipe);
-                a.debug(&mut f, &state).unwrap();
+                write!(f, "{:#?}", a.printable(&state)).unwrap();
 
                 let mut f = std::fs::File::create(exp_filename("problems")).unwrap();
                 a.debug_problems(&mut f, &state).unwrap();
@@ -33,15 +33,7 @@ fn main() {
                 let bt_path = exp_filename("backward_tree");
                 if let Ok(tree) = a.into_tree() {
                     let mut f = std::fs::File::create(bt_path).unwrap();
-                    write!(
-                        f,
-                        "{:#?}",
-                        Printable {
-                            state: &state,
-                            value: &tree,
-                        }
-                    )
-                    .unwrap();
+                    write!(f, "{:#?}", tree.printable(&state)).unwrap();
                 } else if bt_path.exists() {
                     std::fs::remove_file(bt_path).unwrap();
                 }
