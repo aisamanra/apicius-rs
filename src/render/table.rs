@@ -54,12 +54,11 @@ impl<'a> TableGenerator<'a> {
     fn compute_helper(&self, focus: &'a BackwardTree, depth: usize) -> Vec<Vec<String>> {
         let mut vec = Vec::new();
         let mut first = true;
-        let colspan = depth - focus.max_depth + 1;
 
         for i in focus.ingredients.iter() {
             let elem = format!(
                 "<td class=\"ingredient\" colspan=\"{}\">{}</td>",
-                colspan - 1,
+                depth - focus.actions.len() + 1,
                 self.render_ingredient(*i),
             );
             vec.push(vec![elem]);
@@ -76,7 +75,7 @@ impl<'a> TableGenerator<'a> {
         }
 
         for path in focus.paths.iter() {
-            for mut row in self.compute_helper(path, focus.max_depth - focus.actions.len() + 1) {
+            for mut row in self.compute_helper(path, depth - focus.actions.len()) {
                 if first {
                     if focus.actions.is_empty() && focus.ingredients.is_empty() {
                         row.push(format!(
