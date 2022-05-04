@@ -1,3 +1,6 @@
+//! The `checks` module contains passes which verify and analyze
+//! recipes before we render them.
+
 use std::cmp::max;
 use std::collections::{BTreeMap, BTreeSet};
 use std::io;
@@ -11,8 +14,8 @@ struct Path {
     start: Input,
 }
 
-/// A `Problem` represents the failing of an invariant we want to
-/// maintain.
+/// A `Problem` represents an invariant failure which would prevent
+/// our rendering code from rending a recipe.
 ///
 /// TODO:
 ///  - Better display of cycles
@@ -33,9 +36,18 @@ pub enum Problem {
     HasCycle(string_interner::DefaultSymbol),
 }
 
-/// A representation of the straightforward analysis we do on a
-/// recipe. The `map` here maps join points to all the sequences of
-/// actions which lead to them. For example, in a recipe like this:
+/// An `Analysis` takes the raw recipe and turns it into an abstract
+/// format more conducive to analysis.
+///
+/// **NOTE**: this is only public in the API right now for
+/// development. This'll eventually be a fully-internal intermediate
+/// state between the raw input and the backwards tree.
+///
+/// Internal note: an `Analysis` contains two things: a map
+/// representation of the recipe _and_ a list of invariant
+/// violations. The map representation uses join points as keys and
+/// maps them to a set of sequences which lead to that join point. For
+/// example, given the Apicius source
 ///
 /// ```apicius
 /// sample {
@@ -66,10 +78,27 @@ pub struct Analysis {
     problems: Vec<Problem>,
 }
 
-/// This is the "backwards" version of the recipe, starting from the
-/// root. The 'size' parameter here corresponds to how many distinct
-/// input lines lead into it, because that's important for
-/// drawing. For example, for this example graph
+/// The "backwards" version of a recipe starting from the end,
+/// suitable for rendering.
+///
+/// This is a recursive tree structure: all join points have been
+/// fully removed. That means that in order to produce a
+/// `BackwardTree` we'll have to have successfully completed an
+/// analysis which shows the graph is valid.
+///
+/// Each intermediate node contains at least one "action", possibly
+/// more, and zero or more ingredients, but the root node will always
+/// have zero actions and zero ingredients. (It SHOULD be the only
+/// such node.) We also should only ever have ingredients if we're a
+/// leaf node (i.e. a node with no children.)
+///
+/// The 'size' parameter here corresponds to how many distinct input
+/// lines lead into it, computed recursively. The `max_depth`
+/// parameter corresponds to the longest number of steps which lead
+/// into that node plus the number of actions in that node. Both of
+/// these are relevant for drawing code.
+///
+/// For example, for this example graph
 ///
 /// ```apicius
 /// sample {
@@ -80,28 +109,28 @@ pub struct Analysis {
 /// }
 /// ```
 ///
-/// we'll end up with a `BackwardTree` that looks like this
+/// we'll end up with a `BackwardTree` that looks like this, omitting fields that are empty:
 ///
 /// ```yaml
-/// actions: []
 /// size: 3
-/// paths:
-///   - actions: ['quux']
-///     ingredients: ['three']
-///     size: 2
-///     paths:
-///       - actions: ['foo']
-///         ingredients: ['one']
-///         size: 1
-///         paths: []
-///       - actions: ['bar']
-///         ingredients: ['two']
-///         size: 1
-///         paths: []
-///   - actions: ['quux']
-///     ingredients: ['three']
-///     size: 1
-///     paths: []
+/// max_depth: 2
+/// children:
+/// - size: 2
+///   max_depth: 2
+///   actions: [baz]
+///   children:
+///   - size: 1
+///     max_depth: 1
+///     ingredients: [one]
+///     actions: [foo]
+///   - size: 1
+///     max_depth: 1
+///     ingredients: [two]
+///     actions: [bar]
+/// - size: 1
+///   max_depth: 1
+///   ingredients: [three]
+///   actions: [quux]
 /// ```
 #[derive(Debug)]
 pub struct BackwardTree {
@@ -271,7 +300,7 @@ impl Analysis {
     /// TODO: print more of the cycle to make it easier to diagnose,
     /// instead of just, "Hey, here's a node that's involved in a
     /// cycle."
-    pub fn find_cycles(&mut self) {
+    fn find_cycles(&mut self) {
         // this is just doing DFS with an explicit stack
         let mut frontier: Vec<string_interner::DefaultSymbol> = Vec::new();
         let mut seen = BTreeSet::new();
