@@ -1,4 +1,4 @@
-use std::io;
+use std::{fmt,io};
 use std::ops::{Deref, Index};
 
 // A wrapper struct that indicates where a given value was positioned
@@ -247,5 +247,66 @@ impl Index<string_interner::DefaultSymbol> for State {
 impl Default for State {
     fn default() -> State {
         Self::new()
+    }
+}
+
+
+pub struct Printable<'a, T> {
+    pub state: &'a State,
+    pub value: &'a T,
+}
+
+impl<'a, T> Printable<'a, T> {
+    pub fn from_seq<R>(&self, seq: &'a [R]) -> Vec<Printable<R>> {
+        seq.iter().map(|value| Printable {
+            state: self.state,
+            value
+        }).collect()
+    }
+}
+
+impl<'a> fmt::Debug for Printable<'a, IngredientRef> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        Printable {
+            state: self.state,
+            value: &self.state[*self.value]
+        }.fmt(f)
+    }
+}
+
+impl<'a> fmt::Debug for Printable<'a, Ingredient> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        if let Some(amt) = self.value.amount {
+            write!(f, "[{}]", &self.state[amt])?;
+        }
+        write!(f, "{}", &self.state[self.value.stuff])
+    }
+}
+
+impl Ingredient {
+    pub fn debug<'a>(&'a self, state: &'a State) -> Printable<'a, Ingredient> {
+        Printable {
+            value: self, state
+        }
+    }
+}
+
+impl<'a> fmt::Debug for Printable<'a, ActionStep> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", &self.state[self.value.action])?;
+        if !self.value.seasonings.is_empty() {
+            write!(f, " & ")?;
+            write!(f, "{:?}", self.from_seq(&self.value.seasonings))?;
+        }
+        Ok(())
+    }
+}
+
+
+impl ActionStep {
+    pub fn debug<'a>(&'a self, state: &'a State) -> Printable<'a, ActionStep> {
+        Printable {
+            value: self, state
+        }
     }
 }

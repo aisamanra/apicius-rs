@@ -1,27 +1,37 @@
-backward_tree {
-  Node {
-    size: 3
-    max_depth: 3
-    children: [
-      Node {
-        size: 3
-        max_depth: 3
-        actions: [stir & salt]
-        children: [
-          Node {
-            size: 2
-            max_depth: 2
-            ingredients: [[1/2] onion + [1 clove] garlic]
-            actions: [chop coarselysautee & butter]
-          }
-          Node {
-            size: 1
-            max_depth: 1
-            ingredients: [[2] eggs]
-            actions: [whisk]
-          }
-        ]
-      }
-    ]
-  }
+BackwardTree {
+    sz: 3,
+    max_depth: 3,
+    paths: [
+        BackwardTree {
+            sz: 3,
+            max_depth: 3,
+            actions: [
+                stir & [salt],
+            ],
+            paths: [
+                BackwardTree {
+                    sz: 2,
+                    max_depth: 2,
+                    actions: [
+                        chop coarsely,
+                        sautee & [butter],
+                    ],
+                    ingredients: [
+                        [1/2]onion,
+                        [1 clove]garlic,
+                    ],
+                },
+                BackwardTree {
+                    sz: 1,
+                    max_depth: 1,
+                    actions: [
+                        whisk,
+                    ],
+                    ingredients: [
+                        [2]eggs,
+                    ],
+                },
+            ],
+        },
+    ],
 }

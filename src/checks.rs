@@ -3,7 +3,7 @@
 
 use std::cmp::max;
 use std::collections::{BTreeMap, BTreeSet};
-use std::io;
+use std::{fmt,io};
 
 pub use crate::types::State;
 use crate::types::*;
@@ -139,86 +139,6 @@ pub struct BackwardTree {
     pub ingredients: Vec<IngredientRef>,
     pub size: usize,
     pub max_depth: usize,
-}
-
-impl BackwardTree {
-    pub fn debug_raw(&self, w: &mut impl io::Write, s: &State) -> io::Result<()> {
-        writeln!(w, "backward_tree {{")?;
-        self.debug_raw_helper(w, s, 2)?;
-        writeln!(w, "}}")
-    }
-
-    pub fn debug_raw_helper(
-        &self,
-        w: &mut impl io::Write,
-        s: &State,
-        depth: usize,
-    ) -> io::Result<()> {
-        self.indent(w, depth - 1)?;
-        writeln!(w, "Node {{")?;
-
-        self.indent(w, depth)?;
-        writeln!(w, "size: {}", self.size)?;
-
-        self.indent(w, depth)?;
-        writeln!(w, "max_depth: {}", self.max_depth)?;
-
-        if !self.ingredients.is_empty() {
-            self.indent(w, depth)?;
-            write!(w, "ingredients: [")?;
-            s.debug_ingredients(w, &self.ingredients)?;
-            writeln!(w, "]")?;
-        }
-
-        if !self.actions.is_empty() {
-            self.indent(w, depth)?;
-            write!(w, "actions: [")?;
-            for a in self.actions.iter() {
-                s.debug_action_step(w, a)?;
-            }
-            writeln!(w, "]")?;
-        }
-
-        if !self.paths.is_empty() {
-            self.indent(w, depth)?;
-            writeln!(w, "children: [")?;
-            for c in self.paths.iter() {
-                c.debug_raw_helper(w, s, depth + 2)?;
-            }
-
-            self.indent(w, depth)?;
-            writeln!(w, "]")?;
-        }
-
-        self.indent(w, depth - 1)?;
-        writeln!(w, "}}")
-    }
-
-    fn indent(&self, w: &mut impl io::Write, depth: usize) -> io::Result<()> {
-        for _ in 0..depth {
-            write!(w, "  ")?
-        }
-        Ok(())
-    }
-
-    /// Print a `BackwardTree` to the writer
-    pub fn debug(&self, w: &mut impl io::Write, s: &State) -> io::Result<()> {
-        self.debug_helper(w, s, 0)
-    }
-
-    pub fn debug_helper(&self, w: &mut impl io::Write, s: &State, depth: usize) -> io::Result<()> {
-        self.indent(w, depth)?;
-        for a in self.actions.iter() {
-            s.debug_action_step(w, a)?;
-            write!(w, " -> ")?;
-        }
-        s.debug_ingredients(w, &self.ingredients)?;
-        writeln!(w)?;
-        for child in self.paths.iter() {
-            child.debug_helper(w, s, depth + 1)?;
-        }
-        Ok(())
-    }
 }
 
 impl Analysis {
@@ -430,5 +350,23 @@ impl Analysis {
             b.max_depth = max(b.max_depth, nd);
         }
         Ok(b)
+    }
+}
+
+impl<'a> fmt::Debug for Printable<'a, BackwardTree> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut str = f.debug_struct("BackwardTree");
+        str.field("sz", &self.value.size);
+        str.field("max_depth", &self.value.max_depth);
+        if !self.value.actions.is_empty() {
+            str.field("actions", &self.from_seq(&self.value.actions));
+        }
+        if !self.value.ingredients.is_empty() {
+            str.field("ingredients", &self.from_seq(&self.value.ingredients));
+        }
+        if !self.value.paths.is_empty() {
+            str.field("paths", &self.from_seq(&self.value.paths));
+        }
+        str.finish()
     }
 }
