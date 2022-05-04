@@ -1,4 +1,7 @@
-use apicius::{checks, grammar, types::{Printable, State}};
+use apicius::{
+    checks, grammar,
+    types::{Printable, State},
+};
 use std::io::Write;
 
 fn main() {
@@ -30,10 +33,15 @@ fn main() {
                 let bt_path = exp_filename("backward_tree");
                 if let Ok(tree) = a.into_tree() {
                     let mut f = std::fs::File::create(bt_path).unwrap();
-                    write!(f, "{:#?}", Printable {
-                        state: &state,
-                        value: &tree,
-                    }).unwrap();
+                    write!(
+                        f,
+                        "{:#?}",
+                        Printable {
+                            state: &state,
+                            value: &tree,
+                        }
+                    )
+                    .unwrap();
                 } else if bt_path.exists() {
                     std::fs::remove_file(bt_path).unwrap();
                 }

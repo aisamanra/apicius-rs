@@ -1,5 +1,5 @@
-use std::{fmt,io};
 use std::ops::{Deref, Index};
+use std::{fmt, io};
 
 // A wrapper struct that indicates where a given value was positioned
 // in the
@@ -250,7 +250,6 @@ impl Default for State {
     }
 }
 
-
 pub struct Printable<'a, T> {
     pub state: &'a State,
     pub value: &'a T,
@@ -258,10 +257,12 @@ pub struct Printable<'a, T> {
 
 impl<'a, T> Printable<'a, T> {
     pub fn from_seq<R>(&self, seq: &'a [R]) -> Vec<Printable<R>> {
-        seq.iter().map(|value| Printable {
-            state: self.state,
-            value
-        }).collect()
+        seq.iter()
+            .map(|value| Printable {
+                state: self.state,
+                value,
+            })
+            .collect()
     }
 }
 
@@ -269,8 +270,9 @@ impl<'a> fmt::Debug for Printable<'a, IngredientRef> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         Printable {
             state: self.state,
-            value: &self.state[*self.value]
-        }.fmt(f)
+            value: &self.state[*self.value],
+        }
+        .fmt(f)
     }
 }
 
@@ -285,9 +287,7 @@ impl<'a> fmt::Debug for Printable<'a, Ingredient> {
 
 impl Ingredient {
     pub fn debug<'a>(&'a self, state: &'a State) -> Printable<'a, Ingredient> {
-        Printable {
-            value: self, state
-        }
+        Printable { value: self, state }
     }
 }
 
@@ -302,11 +302,8 @@ impl<'a> fmt::Debug for Printable<'a, ActionStep> {
     }
 }
 
-
 impl ActionStep {
     pub fn debug<'a>(&'a self, state: &'a State) -> Printable<'a, ActionStep> {
-        Printable {
-            value: self, state
-        }
+        Printable { value: self, state }
     }
 }

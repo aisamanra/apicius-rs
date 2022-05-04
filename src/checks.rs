@@ -3,7 +3,7 @@
 
 use std::cmp::max;
 use std::collections::{BTreeMap, BTreeSet};
-use std::{fmt,io};
+use std::{fmt, io};
 
 pub use crate::types::State;
 use crate::types::*;

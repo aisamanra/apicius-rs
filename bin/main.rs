@@ -67,10 +67,13 @@ fn main() {
     let analysis = checks::Analysis::from_recipe(&s, &recipe);
     let tree = analysis.into_tree().unwrap();
 
-    println!("{:#?}", types::Printable {
-        value: &tree,
-        state: &s,
-    });
+    println!(
+        "{:#?}",
+        types::Printable {
+            value: &tree,
+            state: &s,
+        }
+    );
     let table = apicius::render::table::TableGenerator::new(&s, &tree).compute();
     {
         use std::io::Write;
