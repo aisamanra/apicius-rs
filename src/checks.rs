@@ -373,8 +373,8 @@ impl<'a> fmt::Debug for Printable<'a, Analysis> {
                 write!(f, "None: ")?;
             }
 
-            self.from_seq(&value).fmt(f)?;
-            write!(f, "\n")?
+            self.from_seq(value).fmt(f)?;
+            writeln!(f)?
         }
         Ok(())
     }

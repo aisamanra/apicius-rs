@@ -304,7 +304,7 @@ impl<'a> fmt::Debug for Printable<'a, Input> {
         match self.value {
             Input::Ingredients { list } => f
                 .debug_tuple("Ingredients")
-                .field(&self.from_seq(&list))
+                .field(&self.from_seq(list))
                 .finish(),
             Input::Join { point } => f.debug_tuple("Join").field(&&self.state[*point]).finish(),
         }
