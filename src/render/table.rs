@@ -17,7 +17,15 @@ struct CellIngredient<'a> {
 impl<'a> CellIngredient<'a> {
     fn html(&self) -> String {
         if let Some(amt) = self.amount {
-            format!("<span class=\"amt\">{}</span> {}", amt, self.name,)
+            format!("<span class=\"amt\">{}</span> {}", amt, self.name)
+        } else {
+            self.name.to_string()
+        }
+    }
+
+    fn debug(&self) -> String {
+        if let Some(amt) = self.amount {
+            format!("[{}] {}", amt, self.name)
         } else {
             self.name.to_string()
         }
@@ -34,6 +42,24 @@ enum CellData<'a> {
         seasonings: Vec<CellIngredient<'a>>,
     },
     Done,
+}
+
+impl<'a> CellData<'a> {
+    fn debug(&self) -> String {
+        match self {
+            CellData::Done => "<>".to_string(),
+            CellData::Step { name, seasonings } => format!(
+                "{} & {}",
+                name,
+                seasonings
+                    .iter()
+                    .map(|i| i.debug())
+                    .collect::<Vec<String>>()
+                    .join(",")
+            ),
+            CellData::Ingredient { i } => i.debug(),
+        }
+    }
 }
 
 impl<'a> Cell<'a> {
@@ -67,6 +93,7 @@ impl<'a> Cell<'a> {
     }
 }
 
+#[derive(Debug)]
 pub struct Table<'a> {
     table_data: Vec<Vec<Cell<'a>>>,
 }
@@ -95,6 +122,22 @@ impl<'a> Table<'a> {
             buf.push_str("  </tr>\n");
         }
         buf.push_str("</table\n");
+        buf
+    }
+
+    pub fn debug(&self) -> String {
+        let mut buf = String::new();
+        for row in self.table_data.iter() {
+            for col in row.iter() {
+                buf.push_str(&format!(
+                    " ({}, {}, {})",
+                    col.colspan,
+                    col.rowspan,
+                    col.contents.debug()
+                ));
+            }
+            buf.push('\n');
+        }
         buf
     }
 }

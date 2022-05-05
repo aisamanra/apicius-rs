@@ -76,12 +76,14 @@ fn main() {
             state: &s,
         }
     );
-    let table = apicius::render::table::Table::new(&s, &tree).html();
+    let table = apicius::render::table::Table::new(&s, &tree);
+    println!("{}", table.debug());
+    let html = table.html();
     {
         use std::io::Write;
         let mut f = std::fs::File::create("samp.html").unwrap();
         write!(&mut f, "{}", HEADER).unwrap();
-        write!(&mut f, "{}", table).unwrap();
+        write!(&mut f, "{}", html).unwrap();
         write!(&mut f, "{}", FOOTER).unwrap();
     }
 }
