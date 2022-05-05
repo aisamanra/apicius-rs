@@ -76,7 +76,7 @@ fn main() {
             state: &s,
         }
     );
-    let table = apicius::render::table::TableGenerator::new(&s, &tree).compute();
+    let table = apicius::render::table::Table::new(&s, &tree).html();
     {
         use std::io::Write;
         let mut f = std::fs::File::create("samp.html").unwrap();

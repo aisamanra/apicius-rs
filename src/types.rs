@@ -323,9 +323,3 @@ impl<'a> fmt::Debug for Printable<'a, ActionStep> {
 }
 
 impl ToPrintable for ActionStep {}
-
-impl ActionStep {
-    pub fn debug<'a>(&'a self, state: &'a State) -> Printable<'a, ActionStep> {
-        Printable { value: self, state }
-    }
-}
