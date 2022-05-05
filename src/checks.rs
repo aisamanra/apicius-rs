@@ -16,7 +16,7 @@ struct Path {
 
 #[derive(Debug)]
 pub struct Problems {
-    problems: Vec<Problem>
+    problems: Vec<Problem>,
 }
 
 impl fmt::Display for Problems {
@@ -328,7 +328,9 @@ impl Analysis {
     /// vector of problems with it
     pub fn into_tree(mut self) -> Result<BackwardTree, Problems> {
         if !self.problems.is_empty() {
-            return Err(Problems {problems: self.problems});
+            return Err(Problems {
+                problems: self.problems,
+            });
         }
 
         let mut b = BackwardTree {

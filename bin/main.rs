@@ -113,7 +113,7 @@ fn realmain() -> Result<(), Box<dyn std::error::Error>> {
 
         if let Command::DebugTable = opts.command {
             writeln!(output, "{}", table.debug())?;
-            return Ok(())
+            return Ok(());
         }
 
         if let Command::HTMLTable { standalone } = opts.command {
@@ -127,7 +127,7 @@ fn realmain() -> Result<(), Box<dyn std::error::Error>> {
                 writeln!(output, "{}", render::constants::STANDALONE_HTML_FOOTER)?;
             }
 
-            return Ok(())
+            return Ok(());
         }
     }
 

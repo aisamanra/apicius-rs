@@ -1,6 +1,5 @@
 use apicius::{
-    checks,
-    grammar,
+    checks, grammar,
     render::table::Table,
     types::{State, ToPrintable},
 };
