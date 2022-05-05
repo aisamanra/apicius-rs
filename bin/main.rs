@@ -1,89 +1,135 @@
 use apicius::types::ToPrintable;
-use apicius::{checks, grammar, types};
+use apicius::{checks, grammar, render, types};
 
-const HEADER: &str = "
-<!DOCTYPE html>
-<html>
-  <body>
-    <style type=\"text/css\">
-      body { font-family: \"Fira Sans\", arial; }
-      td {
-        padding: 1em;
-      }
-      table, td, tr {
-        border: 2px solid;
-        border-spacing: 0px;
-      }
-      .ingredient {
-        background-color: #ddd;
-      }
-      .done {
-        background-color: #555;
-      }
-      .amt { color: #555; }
-      .seasonings { color: #333; }
-    </style>
-";
+use clap::{Parser, Subcommand};
 
-const FOOTER: &str = "
-  </body>
-</html>
-";
+use std::io;
+use std::io::Read;
 
-const SAMPLE: &str = "
-soondubu jigae {
-  [1/2] yellow onion
-     -> dice
-     -> cook 5m
-     -> $chili
-     -> cook 1m
-     -> $zucchini
-     -> stir &salt
-     -> $kimchi
-     -> simmer 2m
-     -> $broth
-     -> boil &salt
-     -> $tofu
-     -> cover with broth -> simmer
-     -> $eggs
-     -> cook 2m
-     -> <>;
-  [2 tbsp] chili paste -> $chili;
-  [1] zucchini -> dice -> $zucchini;
-  [1 cup] kimchi -> chop coarsely -> $kimchi;
-  [2 cups] beef or chicken broth + [1 tsp] soy sauce
-    -> $broth;
-  [16oz] silken tofu -> $tofu;
-  [3] eggs -> $eggs;
+#[derive(Debug, Parser)]
+#[clap(author, version, about, long_about = None)]
+#[clap(propagate_version = true)]
+struct Opts {
+    #[clap(subcommand)]
+    command: Command,
+
+    #[clap(short, long)]
+    input: Option<String>,
+
+    #[clap(short, long)]
+    output: Option<String>,
 }
-";
+
+#[derive(Debug, Subcommand)]
+enum Command {
+    HTMLTable {
+        #[clap(short, long)]
+        standalone: bool,
+    },
+    DebugParseTree,
+    DebugAnalysis,
+    DebugBackwardTree,
+    DebugTable,
+}
+
+impl Command {
+    fn is_table_command(&self) -> bool {
+        match self {
+            Command::HTMLTable { .. } => true,
+            Command::DebugTable => true,
+            _ => false,
+        }
+    }
+}
+
+fn get_input(input: Option<String>) -> io::Result<String> {
+    let path = if let Some(path) = input {
+        path
+    } else {
+        let mut buf = String::new();
+        io::stdin().read_to_string(&mut buf)?;
+        return Ok(buf);
+    };
+    if path == "-" {
+        let mut buf = String::new();
+        io::stdin().read_to_string(&mut buf)?;
+        return Ok(buf);
+    }
+
+    std::fs::read_to_string(path)
+}
+
+fn get_output(output: Option<String>) -> io::Result<Box<dyn io::Write>> {
+    let path = if let Some(path) = output {
+        path
+    } else {
+        return Ok(Box::new(io::stdout()));
+    };
+    if path == "-" {
+        return Ok(Box::new(io::stdout()));
+    }
+
+    let f = std::fs::File::create(path)?;
+    Ok(Box::new(f))
+}
 
 fn main() {
-    let mut s = types::State::new();
-    let recipe = grammar::RecipeParser::new().parse(&mut s, SAMPLE);
-    println!("{:?}", recipe);
-    assert!(recipe.is_ok());
-    let recipe = recipe.unwrap();
-    s.debug_recipe(&mut std::io::stdout(), &recipe).unwrap();
-    let analysis = checks::Analysis::from_recipe(&s, &recipe);
-    println!("{:#?}", analysis.printable(&s));
-    let tree = analysis.into_tree().unwrap();
-
-    println!(
-        "{:#?}",
-        types::Printable {
-            value: &tree,
-            state: &s,
-        }
-    );
-    let table = apicius::render::table::Table::new(&s, &tree);
-    println!("{}", table.debug());
-    let html = table.html();
-    {
-        use std::io::Write;
-        let mut f = std::fs::File::create("samp.html").unwrap();
-        write!(&mut f, "{}", HEADER).unwrap();
-        write!(&mut f, "{}", html).unwrap();
-        write!(&mut f, "{}", FOOTER).unwrap();
+    if let Err(err) = realmain() {
+        println!("Error when running `apicius`: {}", err);
     }
+}
+
+fn realmain() -> Result<(), Box<dyn std::error::Error>> {
+    let opts = Opts::parse();
+
+    let input = get_input(opts.input)?;
+    let mut output = get_output(opts.output)?;
+
+    let mut s = types::State::new();
+    // TODO: convert these errors
+    let recipe = grammar::RecipeParser::new().parse(&mut s, &input).unwrap();
+
+    if let Command::DebugParseTree = opts.command {
+        s.debug_recipe(&mut output, &recipe)?;
+        return Ok(());
+    }
+
+    let analysis = checks::Analysis::from_recipe(&s, &recipe);
+
+    if let Command::DebugAnalysis = opts.command {
+        writeln!(output, "{:#?}", analysis.printable(&s))?;
+        return Ok(());
+    }
+
+    let tree = analysis.into_tree()?;
+
+    if let Command::DebugBackwardTree = opts.command {
+        writeln!(output, "{:#?}", tree.printable(&s))?;
+        return Ok(());
+    }
+
+    if opts.command.is_table_command() {
+        let table = render::table::Table::new(&s, &tree);
+
+        if let Command::DebugTable = opts.command {
+            writeln!(output, "{}", table.debug())?;
+            return Ok(())
+        }
+
+        if let Command::HTMLTable { standalone } = opts.command {
+            if standalone {
+                writeln!(output, "{}", render::constants::STANDALONE_HTML_HEADER)?;
+            }
+
+            writeln!(output, "{}", table.html())?;
+
+            if standalone {
+                writeln!(output, "{}", render::constants::STANDALONE_HTML_FOOTER)?;
+            }
+
+            return Ok(())
+        }
+    }
+
+    Ok(())
 }

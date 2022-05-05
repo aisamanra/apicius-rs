@@ -14,6 +14,23 @@ struct Path {
     start: Input,
 }
 
+#[derive(Debug)]
+pub struct Problems {
+    problems: Vec<Problem>
+}
+
+impl fmt::Display for Problems {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "Found the following problems:")?;
+        for p in self.problems.iter() {
+            writeln!(f, "  - {:?}", p)?;
+        }
+        Ok(())
+    }
+}
+
+impl std::error::Error for Problems {}
+
 /// A `Problem` represents an invariant failure which would prevent
 /// our rendering code from rending a recipe.
 ///
@@ -309,9 +326,9 @@ impl Analysis {
     /// and therefore consumes the `Analysis`. If this can't be turned
     /// into a `BackwardTree`, then this will instead return the
     /// vector of problems with it
-    pub fn into_tree(mut self) -> Result<BackwardTree, Vec<Problem>> {
+    pub fn into_tree(mut self) -> Result<BackwardTree, Problems> {
         if !self.problems.is_empty() {
-            return Err(self.problems);
+            return Err(Problems {problems: self.problems});
         }
 
         let mut b = BackwardTree {

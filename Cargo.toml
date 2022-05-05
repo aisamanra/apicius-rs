@@ -1,11 +1,9 @@
 [package]
 name = "apicius"
 version = "0.1.0"
-authors = ["Getty Ritter <gettylefou@gmail.com>"]
+authors = ["Getty Ritter <apicius@infinitenegativeutility.com>"]
 edition = "2018"
 default-run = "apicius"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [lib]
 name = "apicius"
@@ -27,6 +25,7 @@ thiserror = "*"
 cairo-rs = { version = "*", features = ["png"] }
 pango = "*"
 pangocairo = "*"
+clap = { version = "*", features = ["derive"] }
 
 [dev-dependencies]
 pretty_assertions = "*"
