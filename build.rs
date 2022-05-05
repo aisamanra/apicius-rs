@@ -10,6 +10,7 @@ use pretty_assertions::{assert_eq};
 use crate::types::*;
 use crate::grammar;
 use crate::checks;
+use crate::render;
 
 // to let us use pretty_assertions with strings, we write a newtype
 // that delegates Debug to Display
@@ -73,6 +74,16 @@ fn test_%PREFIX%() {
       }),
       expected.trim(),
     );
+
+    let table_path = std::path::Path::new(\"%ROOT%/tests/%PREFIX%.raw_table\");
+    if table_path.exists() {
+      let expected = std::fs::read_to_string(table_path).unwrap();
+      let table = render::table::Table::new(&s, &tree);
+      assert_eq(
+        table.debug().trim(),
+        expected.trim(),
+      );
+    }
   }
 }
 ";
