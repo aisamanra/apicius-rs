@@ -17,9 +17,7 @@ struct CellIngredient<'a> {
 impl<'a> CellIngredient<'a> {
     fn html(&self) -> String {
         if let Some(amt) = self.amount {
-            format!("<span class=\"amt\">{}</span> {}",
-                    amt, self.name,
-            )
+            format!("<span class=\"amt\">{}</span> {}", amt, self.name,)
         } else {
             self.name.to_string()
         }
@@ -28,8 +26,13 @@ impl<'a> CellIngredient<'a> {
 
 #[derive(Debug)]
 enum CellData<'a> {
-    Ingredient { i: CellIngredient<'a> },
-    Step { name: &'a str, seasonings: Vec<CellIngredient<'a>> },
+    Ingredient {
+        i: CellIngredient<'a>,
+    },
+    Step {
+        name: &'a str,
+        seasonings: Vec<CellIngredient<'a>>,
+    },
     Done,
 }
 
@@ -51,15 +54,14 @@ impl<'a> Cell<'a> {
                 buf.push_str("</div>");
                 buf
             }
-            CellData::Ingredient { i } =>
-                i.html(),
+            CellData::Ingredient { i } => i.html(),
         }
     }
 
     fn html_class(&self) -> &'static str {
         match self.contents {
-            CellData::Ingredient {..} => "ingredient",
-            CellData::Step {..} => "step",
+            CellData::Ingredient { .. } => "ingredient",
+            CellData::Step { .. } => "step",
             CellData::Done => "done",
         }
     }
@@ -82,11 +84,13 @@ impl<'a> Table<'a> {
         for row in self.table_data.iter() {
             buf.push_str("  <tr>");
             for cell in row.iter() {
-                buf.push_str(&format!("<td class=\"{}\" rowspan=\"{}\" colspan=\"{}\">{}</td>",
-                                      cell.html_class(),
-                                      cell.rowspan,
-                                      cell.colspan,
-                                      cell.html()));
+                buf.push_str(&format!(
+                    "<td class=\"{}\" rowspan=\"{}\" colspan=\"{}\">{}</td>",
+                    cell.html_class(),
+                    cell.rowspan,
+                    cell.colspan,
+                    cell.html()
+                ));
             }
             buf.push_str("  </tr>\n");
         }
@@ -115,9 +119,12 @@ impl<'a> TableGenerator<'a> {
     fn action_to_cell(&self, a: &ActionStep) -> CellData<'a> {
         CellData::Step {
             name: &self.state[a.action],
-            seasonings: a.seasonings.iter().map(|i| self.ingredient_to_cell_ingredient(*i)).collect(),
+            seasonings: a
+                .seasonings
+                .iter()
+                .map(|i| self.ingredient_to_cell_ingredient(*i))
+                .collect(),
         }
-
     }
 
     fn to_table(&self, focus: &'a BackwardTree, depth: usize) -> Vec<Vec<Cell<'a>>> {
@@ -130,7 +137,7 @@ impl<'a> TableGenerator<'a> {
                 colspan: depth - focus.actions.len() + 1,
                 contents: CellData::Ingredient {
                     i: self.ingredient_to_cell_ingredient(*i),
-                }
+                },
             };
             vec.push(vec![elem]);
         }
