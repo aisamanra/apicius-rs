@@ -92,7 +92,8 @@ $eggs: [
         Join(
             "$tofu",
         ),
-        cover with broth, simmer,
+        cover with broth,
+        simmer,
     ],
     [
         Ingredients(

@@ -1,19 +1,20 @@
 BackwardTree {
     sz: 8,
-    max_depth: 8,
+    max_depth: 9,
     paths: [
         BackwardTree {
             sz: 8,
-            max_depth: 8,
+            max_depth: 9,
             actions: [
                 cook 2m,
             ],
             paths: [
                 BackwardTree {
                     sz: 7,
-                    max_depth: 7,
+                    max_depth: 8,
                     actions: [
-                        cover with broth, simmer,
+                        cover with broth,
+                        simmer,
                     ],
                     paths: [
                         BackwardTree {
