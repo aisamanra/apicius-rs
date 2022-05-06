@@ -31,11 +31,7 @@ enum Command {
 
 impl Command {
     fn is_table_command(&self) -> bool {
-        match self {
-            Command::HTMLTable { .. } => true,
-            Command::DebugTable => true,
-            _ => false,
-        }
+        matches!(self, Command::HTMLTable { .. } | Command::DebugTable)
     }
 }
 
