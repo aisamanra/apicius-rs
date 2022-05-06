@@ -17,7 +17,7 @@ pub const STANDALONE_HTML_HEADER: &str = "
       .done {
         background-color: #555;
       }
-      .amt { color: #555; }
+      .amount { color: #555; }
       .seasonings { color: #333; }
     </style>
 ";

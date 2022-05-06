@@ -1,4 +1,5 @@
 use crate::checks::BackwardTree;
+use crate::render::constants;
 use crate::types::{ActionStep, IngredientRef, State};
 
 #[derive(Debug)]
@@ -14,10 +15,41 @@ struct CellIngredient<'a> {
     amount: Option<&'a str>,
 }
 
+#[derive(Debug)]
+pub struct HTMLTableOptions {
+    pub standalone: bool,
+    pub standalone_header: String,
+    pub standalone_footer: String,
+
+    pub amount_class: String,
+    pub seasonings_class: String,
+    pub ingredient_class: String,
+    pub action_class: String,
+    pub done_class: String,
+}
+
+impl std::default::Default for HTMLTableOptions {
+    fn default() -> HTMLTableOptions {
+        HTMLTableOptions {
+            standalone: false,
+            standalone_header: constants::STANDALONE_HTML_HEADER.to_string(),
+            standalone_footer: constants::STANDALONE_HTML_FOOTER.to_string(),
+            amount_class: "amount".to_string(),
+            seasonings_class: "seasonings".to_string(),
+            ingredient_class: "ingredient".to_string(),
+            action_class: "action".to_string(),
+            done_class: "done".to_string(),
+        }
+    }
+}
+
 impl<'a> CellIngredient<'a> {
-    fn html(&self) -> String {
+    fn html(&self, opts: &HTMLTableOptions) -> String {
         if let Some(amt) = self.amount {
-            format!("<span class=\"amt\">{}</span> {}", amt, self.name)
+            format!(
+                "<span class=\"{}\">{}</span> {}",
+                opts.amount_class, amt, self.name
+            )
         } else {
             self.name.to_string()
         }
@@ -63,7 +95,7 @@ impl<'a> CellData<'a> {
 }
 
 impl<'a> Cell<'a> {
-    fn html(&self) -> String {
+    fn html(&self, opts: &HTMLTableOptions) -> String {
         match &self.contents {
             CellData::Done => "<>".to_string(),
             CellData::Step { name, seasonings } => {
@@ -72,23 +104,25 @@ impl<'a> Cell<'a> {
                 if seasonings.is_empty() {
                     return buf;
                 }
-                buf.push_str("<div class=\"seasonings\">+");
+                buf.push_str("<div class=\"");
+                buf.push_str(&opts.seasonings_class);
+                buf.push_str("\">");
                 for i in seasonings.iter() {
-                    buf.push_str(&i.html());
+                    buf.push_str(&i.html(opts));
                     buf.push(' ');
                 }
                 buf.push_str("</div>");
                 buf
             }
-            CellData::Ingredient { i } => i.html(),
+            CellData::Ingredient { i } => i.html(opts),
         }
     }
 
-    fn html_class(&self) -> &'static str {
+    fn html_class<'b>(&'a self, opts: &'b HTMLTableOptions) -> &'b str {
         match self.contents {
-            CellData::Ingredient { .. } => "ingredient",
-            CellData::Step { .. } => "step",
-            CellData::Done => "done",
+            CellData::Ingredient { .. } => &opts.ingredient_class,
+            CellData::Step { .. } => &opts.action_class,
+            CellData::Done => &opts.done_class,
         }
     }
 }
@@ -105,7 +139,7 @@ impl<'a> Table<'a> {
         }
     }
 
-    pub fn html(&self) -> String {
+    pub fn html(&self, opts: &HTMLTableOptions) -> String {
         let mut buf = String::new();
         buf.push_str("<table>\n");
         for row in self.table_data.iter() {
@@ -113,10 +147,10 @@ impl<'a> Table<'a> {
             for cell in row.iter() {
                 buf.push_str(&format!(
                     "<td class=\"{}\" rowspan=\"{}\" colspan=\"{}\">{}</td>",
-                    cell.html_class(),
+                    cell.html_class(opts),
                     cell.rowspan,
                     cell.colspan,
-                    cell.html()
+                    cell.html(opts)
                 ));
             }
             buf.push_str("  </tr>\n");
