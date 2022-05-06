@@ -22,31 +22,7 @@ struct Opts {
 
 #[derive(Debug, Subcommand)]
 enum Command {
-    HTMLTable {
-        #[clap(short, long)]
-        standalone: bool,
-
-        #[clap(long)]
-        html_header: Option<String>,
-
-        #[clap(long)]
-        html_footer: Option<String>,
-
-        #[clap(long)]
-        amount_class: Option<String>,
-
-        #[clap(long)]
-        seasonings_class: Option<String>,
-
-        #[clap(long)]
-        ingredient_class: Option<String>,
-
-        #[clap(long)]
-        action_class: Option<String>,
-
-        #[clap(long)]
-        done_class: Option<String>,
-    },
+    HTMLTable(render::table::HTMLTableOptions),
     DebugParseTree,
     DebugAnalysis,
     DebugBackwardTree,
@@ -59,47 +35,6 @@ impl Command {
             Command::HTMLTable { .. } => true,
             Command::DebugTable => true,
             _ => false,
-        }
-    }
-
-    fn to_html_table_options(self) -> Option<render::table::HTMLTableOptions> {
-        if let Command::HTMLTable {
-            standalone,
-            html_header,
-            html_footer,
-            amount_class,
-            seasonings_class,
-            ingredient_class,
-            action_class,
-            done_class,
-        } = self
-        {
-            let mut opts = render::table::HTMLTableOptions::default();
-            opts.standalone = standalone;
-            if let Some(s) = html_header {
-                opts.standalone_header = s;
-            }
-            if let Some(s) = html_footer {
-                opts.standalone_footer = s;
-            }
-            if let Some(s) = amount_class {
-                opts.amount_class = s;
-            }
-            if let Some(s) = seasonings_class {
-                opts.seasonings_class = s;
-            }
-            if let Some(s) = ingredient_class {
-                opts.ingredient_class = s;
-            }
-            if let Some(s) = action_class {
-                opts.action_class = s;
-            }
-            if let Some(s) = done_class {
-                opts.done_class = s;
-            }
-            Some(opts)
-        } else {
-            None
         }
     }
 }
@@ -178,15 +113,15 @@ fn realmain() -> Result<(), Box<dyn std::error::Error>> {
             return Ok(());
         }
 
-        if let Some(opts) = opts.command.to_html_table_options() {
+        if let Command::HTMLTable(opts) = opts.command {
             if opts.standalone {
-                writeln!(output, "{}", opts.standalone_header)?;
+                writeln!(output, "{}", opts.html_header)?;
             }
 
             writeln!(output, "{}", table.html(&opts))?;
 
             if opts.standalone {
-                writeln!(output, "{}", opts.standalone_footer)?;
+                writeln!(output, "{}", opts.html_footer)?;
             }
 
             return Ok(());
