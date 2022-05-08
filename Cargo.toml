@@ -25,7 +25,7 @@ thiserror = "*"
 cairo-rs = { version = "*", features = ["png"] }
 pango = "*"
 pangocairo = "*"
-clap = { version = "*", features = ["derive", "cargo"] }
+clap = { version = "*", features = ["cargo"] }
 
 [dev-dependencies]
 pretty_assertions = "*"

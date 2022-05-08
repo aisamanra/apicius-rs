@@ -2,8 +2,6 @@ use crate::checks::BackwardTree;
 use crate::render::constants;
 use crate::types::{ActionStep, IngredientRef, State};
 
-use clap::Args;
-
 #[derive(Debug)]
 struct Cell<'a> {
     colspan: usize,
@@ -17,30 +15,15 @@ struct CellIngredient<'a> {
     amount: Option<&'a str>,
 }
 
-#[derive(Debug, Args)]
+#[derive(Debug)]
 pub struct HTMLTableOptions {
-    #[clap(long)]
     pub standalone: bool,
-
-    #[clap(long, default_value_t=constants::STANDALONE_HTML_HEADER.to_string())]
     pub html_header: String,
-
-    #[clap(long, default_value_t=constants::STANDALONE_HTML_FOOTER.to_string())]
     pub html_footer: String,
-
-    #[clap(long, default_value_t=String::from("amount"))]
     pub amount_class: String,
-
-    #[clap(long, default_value_t=String::from("seasonings"))]
     pub seasonings_class: String,
-
-    #[clap(long, default_value_t=String::from("ingredient"))]
     pub ingredient_class: String,
-
-    #[clap(long, default_value_t=String::from("action"))]
     pub action_class: String,
-
-    #[clap(long, default_value_t=String::from("done"))]
     pub done_class: String,
 }
 
