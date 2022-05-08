@@ -44,6 +44,21 @@ pub struct HTMLTableOptions {
     pub done_class: String,
 }
 
+impl std::default::Default for HTMLTableOptions {
+    fn default() -> HTMLTableOptions {
+        HTMLTableOptions {
+            standalone: false,
+            html_header: constants::STANDALONE_HTML_HEADER.to_string(),
+            html_footer: constants::STANDALONE_HTML_FOOTER.to_string(),
+            amount_class: "amount".to_string(),
+            seasonings_class: "seasonings".to_string(),
+            ingredient_class: "ingredient".to_string(),
+            action_class: "action".to_string(),
+            done_class: "done".to_string(),
+        }
+    }
+}
+
 impl<'a> CellIngredient<'a> {
     fn html(&self, opts: &HTMLTableOptions) -> String {
         if let Some(amt) = self.amount {
