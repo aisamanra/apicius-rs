@@ -29,7 +29,7 @@ impl Opts {
     }
 
     pub fn parse() -> Opts {
-        let cmd = command!()
+        let matches = command!()
             .propagate_version(true)
             .subcommand_required(true)
             .subcommand(Opts::subcommand("debug-parse-tree").about("Print the raw parse tree"))
@@ -49,8 +49,8 @@ impl Opts {
                     .arg(arg!(--ingredient_class <INGREDIENT_CLASS>).required(false))
                     .arg(arg!(--action_class <ACTION_CLASS>).required(false))
                     .arg(arg!(--done_class <DONE_CLASS>).required(false)),
-            );
-        let matches = cmd.get_matches();
+            )
+            .get_matches();
         let (command, input, output) = match matches.subcommand() {
             // the basic debug ones
             Some(("debug-parse-tree", opts)) => {
